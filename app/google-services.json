@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "132252891133",
+    "project_id": "caster-android",
+    "storage_bucket": "caster-android.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:132252891133:android:e0c2bb4aee322d4fc58b94",
+        "android_client_info": {
+          "package_name": "com.zakojifarm.farmapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "132252891133-l8qg54q86896333hps0cojhcsa0cj8qk.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDXLpfvsz3norEQr92QFE7wQd_pwpdIn3U"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "132252891133-l8qg54q86896333hps0cojhcsa0cj8qk.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
