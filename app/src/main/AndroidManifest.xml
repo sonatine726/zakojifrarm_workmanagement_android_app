@@ -13,12 +13,7 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.ZakojiFarmApp">
-
-        <activity
-            android:name="com.zakojifarm.farmapp.SplashScreenActivity"
-            android:exported="true"
-            android:theme="@style/Theme.SplashTheme" />
+        android:theme="@style/Theme.App.Starting">
 
         <activity
             android:name="com.zakojifarm.farmapp.MainActivity"
