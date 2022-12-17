@@ -1,4 +1,4 @@
-package com.zakojifarm.farmapp
+package com.zakojifarm.farmapp.ui
 
 import android.animation.ObjectAnimator
 import android.os.Build
@@ -24,6 +24,10 @@ import androidx.compose.ui.unit.sp
 import androidx.core.animation.doOnEnd
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.lifecycleScope
+import com.zakojifarm.farmapp.Constant
+import com.zakojifarm.farmapp.R
+import com.zakojifarm.farmapp.data.WorkKind
+import com.zakojifarm.farmapp.data.WorkStatus
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.time.Instant

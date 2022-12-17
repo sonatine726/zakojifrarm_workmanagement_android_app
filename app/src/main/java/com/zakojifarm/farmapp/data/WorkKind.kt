@@ -1,7 +1,9 @@
-package com.zakojifarm.farmapp
+package com.zakojifarm.farmapp.data
 
 import android.os.Parcelable
 import androidx.annotation.StringRes
+import com.zakojifarm.farmapp.MainApplication
+import com.zakojifarm.farmapp.R
 import kotlinx.parcelize.Parcelize
 
 @Parcelize

@@ -17,7 +17,7 @@
         android:theme="@style/Theme.App.Starting">
 
         <activity
-            android:name="com.zakojifarm.farmapp.MainActivity"
+            android:name="com.zakojifarm.farmapp.ui.MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
