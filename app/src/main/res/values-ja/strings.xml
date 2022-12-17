@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">お米の座光寺農園 App</string>
+
+    <string name="working_status_title">勤務状況</string>
+
+    <string name="work_status_off_duty">勤務外</string>
+    <string name="work_status_working">勤務中</string>
+    <string name="work_status_break">休憩中</string>
+
+    <string name="work_kind_mowing">草刈り</string>
+    <string name="work_kind_tractor">トラクター</string>
+    <string name="work_kind_others">その他作業</string>
+</resources>

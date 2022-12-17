@@ -1,3 +1,13 @@
 <resources>
-    <string name="app_name">ZakojiFarmApp</string>
+    <string name="app_name">ZakojiFarm App</string>
+
+    <string name="working_status_title">Working Status</string>
+
+    <string name="work_status_off_duty">Off Duty</string>
+    <string name="work_status_working">Working</string>
+    <string name="work_status_break">Break</string>
+
+    <string name="work_kind_mowing">Mowing</string>
+    <string name="work_kind_tractor">Tractor</string>
+    <string name="work_kind_others">Others</string>
 </resources>

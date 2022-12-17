@@ -2,7 +2,7 @@ package com.zakojifarm.farmapp
 
 class Constant {
     companion object {
-        const val SPLASH_SCREEN_DURATION = 3000L
+        const val SPLASH_SCREEN_DURATION = 1000L
 
 //        val permissions = arrayOf(
 //            android.Manifest.permission.INTERNET,
