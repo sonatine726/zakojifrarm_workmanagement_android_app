@@ -1,6 +1,7 @@
 package com.zakojifarm.farmapp.ui
 
 import android.animation.ObjectAnimator
+import android.annotation.SuppressLint
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -25,9 +26,11 @@ import androidx.core.animation.doOnEnd
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.lifecycleScope
 import com.zakojifarm.farmapp.Constant
+import com.zakojifarm.farmapp.MainApplication
 import com.zakojifarm.farmapp.R
 import com.zakojifarm.farmapp.data.WorkKind
 import com.zakojifarm.farmapp.data.WorkStatus
+import com.zakojifarm.farmapp.ui.theme.AppTheme
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.time.Instant
@@ -49,6 +52,8 @@ class MainActivity : AppCompatActivity() {
 
     private val viewModel: WorkStatusViewModel by viewModels()
 
+    @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
+    @OptIn(ExperimentalMaterial3Api::class)
     @RequiresApi(Build.VERSION_CODES.S)
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen().run {
@@ -74,8 +79,17 @@ class MainActivity : AppCompatActivity() {
         Log.v(TAG, "onCreate")
 
         setContent {
-            MaterialTheme {
-                MainScreen()
+            AppTheme {
+                Scaffold(
+                    containerColor = Color(
+                        MainApplication.instance.resources.getColor(
+                            R.color.main_screen_bg_color,
+                            MainApplication.instance.theme
+                        )
+                    )
+                ) {
+                    MainScreen()
+                }
             }
         }
 
@@ -108,6 +122,24 @@ class MainActivity : AppCompatActivity() {
             UserName(name = userName.value, onNameChange = { viewModel.setUserName(it) })
             Spacer(Modifier.size(1.dp))
             WorkingStatus(workStatus.value, workKind.value)
+            Spacer(Modifier.size(1.dp))
+            Button(
+                onClick = { /* Do something */ },
+            ) {
+                Text("勤務開始")
+            }
+            Spacer(Modifier.size(1.dp))
+            Button(
+                onClick = { /* Do something */ },
+            ) {
+                Text("休憩")
+            }
+            Spacer(Modifier.size(1.dp))
+            Button(
+                onClick = { /* Do something */ },
+            ) {
+                Text("データアップロード")
+            }
         }
     }
 
