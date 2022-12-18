@@ -7,10 +7,15 @@ import com.zakojifarm.farmapp.R
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
-enum class WorkKind(@StringRes private val stringId: Int) : Parcelable {
-    MOWING(R.string.work_kind_mowing),
-    TRACTOR(R.string.work_kind_tractor),
-    OTHERS(R.string.work_kind_others);
+enum class WorkKind(val id: Int, @StringRes private val stringId: Int) : Parcelable {
+    MOWING(1, R.string.work_kind_mowing),
+    TRACTOR(2, R.string.work_kind_tractor),
+    OTHERS(3, R.string.work_kind_others);
+
+    companion object {
+        private val VALUES = values()
+        fun fromId(id: Int) = VALUES.firstOrNull { it.id == id }
+    }
 
     override fun toString(): String {
         return MainApplication.instance.resources.getString(stringId)

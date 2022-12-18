@@ -4,10 +4,10 @@ import androidx.room.*
 import kotlinx.coroutines.flow.Flow
 
 @Dao
-interface UserDao : BaseDao<UserDao> {
-    @Query("SELECT * FROM users WHERE id = :id")
+interface UserDao : BaseDao<UserEntity> {
+    @Query("SELECT * FROM ${UserDatabase.DB_NAME} WHERE id = :id")
     fun get(id: Int): Flow<UserEntity?>
 
-    @Query("SELECT * FROM users")
+    @Query("SELECT * FROM ${UserDatabase.DB_NAME}")
     fun selectAll(): Flow<List<UserEntity>>
 }

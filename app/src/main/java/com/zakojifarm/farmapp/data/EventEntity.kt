@@ -1,0 +1,26 @@
+package com.zakojifarm.farmapp.data
+
+import androidx.room.*
+import java.time.LocalDateTime
+
+@Entity(
+    tableName = EventDatabase.DB_NAME,
+    foreignKeys = [ForeignKey(
+        entity = UserEntity::class,
+        parentColumns = ["id"],
+        childColumns = ["user_id"],
+        onDelete = ForeignKey.CASCADE
+    )]
+)
+@TypeConverters(
+    LocalDateTimeConverters::class,
+    EventKindConverters::class,
+    WorkKindConverters::class
+)
+data class EventEntity(
+    @PrimaryKey(autoGenerate = true) var id: Long,
+    val time: LocalDateTime,
+    val kind: EventKind,
+    @ColumnInfo(name = "work_kind") val workKind: WorkKind,
+    @ColumnInfo(name = "user_id", index = true) var userId: Long
+)
