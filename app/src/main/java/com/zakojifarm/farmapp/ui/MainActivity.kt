@@ -12,7 +12,7 @@ import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.*
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -111,6 +111,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     fun UserName(name: String, onNameChange: (String) -> Unit) {
         Column(modifier = Modifier.padding(16.dp)) {
@@ -118,7 +119,7 @@ class MainActivity : AppCompatActivity() {
                 Text(
                     text = "Hello, $name",
                     modifier = Modifier.padding(bottom = 8.dp),
-                    style = MaterialTheme.typography.h5
+                    style = MaterialTheme.typography.bodyLarge
                 )
             }
             OutlinedTextField(
@@ -166,14 +167,14 @@ class MainActivity : AppCompatActivity() {
             Text(
                 text = stringResource(R.string.working_status_title),
                 modifier = Modifier.padding(bottom = 8.dp),
-                style = MaterialTheme.typography.h5,
+                style = MaterialTheme.typography.bodyMedium,
                 fontSize = 16.sp
             )
             Spacer(Modifier.size(1.dp))
             Text(
                 text = "$status : $kind",
                 modifier = Modifier.padding(bottom = 8.dp),
-                style = MaterialTheme.typography.h5,
+                style = MaterialTheme.typography.bodyLarge,
                 fontSize = 24.sp
             )
         }
