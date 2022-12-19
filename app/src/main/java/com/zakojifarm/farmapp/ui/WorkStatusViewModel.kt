@@ -1,6 +1,8 @@
-package com.zakojifarm.farmapp
+package com.zakojifarm.farmapp.ui
 
 import androidx.lifecycle.ViewModel
+import com.zakojifarm.farmapp.data.WorkKind
+import com.zakojifarm.farmapp.data.WorkStatus
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
