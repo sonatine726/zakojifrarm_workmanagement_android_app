@@ -13,10 +13,14 @@ import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -86,7 +90,8 @@ class MainActivity : AppCompatActivity() {
                             R.color.main_screen_bg_color,
                             MainApplication.instance.theme
                         )
-                    )
+                    ),
+                    topBar = { MainTopAppBar() }
                 ) {
                     MainScreen()
                 }
@@ -105,6 +110,42 @@ class MainActivity : AppCompatActivity() {
                     Log.v(TAG, "PreDraw.$canStart")
                     if (canStart) content.viewTreeObserver.removeOnPreDrawListener(this)
                     return canStart
+                }
+            }
+        )
+    }
+
+    @OptIn(ExperimentalMaterial3Api::class)
+    @Composable
+    fun MainTopAppBar() {
+        val topAppBarState = rememberTopAppBarState()
+        val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(topAppBarState)
+
+        CenterAlignedTopAppBar(
+            title = {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.End)
+                ) {
+                    Text(text = stringResource(id = R.string.app_name))
+                    Icon(
+                        painter = painterResource(R.drawable.main_icon),
+                        contentDescription = "Image",
+                        tint = Color.Unspecified,
+                        modifier = Modifier.size(width = 40.dp, height = 40.dp)
+                    )
+                }
+            },
+            colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                containerColor = MaterialTheme.colorScheme.primaryContainer
+            ),
+            scrollBehavior = scrollBehavior,
+            navigationIcon = {
+                IconButton(onClick = { /* doSomething() */ }) {
+                    Icon(
+                        imageVector = Icons.Filled.Menu,
+                        contentDescription = "Localized description"
+                    )
                 }
             }
         )
@@ -220,5 +261,17 @@ class MainActivity : AppCompatActivity() {
 
         val df = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss")
         return df.format(zonedDt)
+    }
+
+    @Composable
+    fun WorkKindButton(kind: WorkKind) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text(
+                text = stringResource(R.string.working_status_title),
+                modifier = Modifier.padding(bottom = 8.dp),
+                style = MaterialTheme.typography.bodyMedium,
+                fontSize = 16.sp
+            )
+        }
     }
 }
