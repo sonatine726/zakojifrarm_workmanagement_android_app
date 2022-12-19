@@ -92,8 +92,10 @@ class MainActivity : AppCompatActivity() {
                         )
                     ),
                     topBar = { MainTopAppBar() }
-                ) {
-                    MainScreen()
+                ) { innerPadding ->
+                    Column(modifier = Modifier.padding(innerPadding)) {
+                        MainScreen()
+                    }
                 }
             }
         }
@@ -159,9 +161,23 @@ class MainActivity : AppCompatActivity() {
         var currentWorkKind by remember {
             mutableStateOf(WorkKind.MOWING)
         }
+        var showDialog by remember { mutableStateOf(false) }
 
+        if (showDialog)
+            CustomDialog(value = "", setShowDialog = {
+                showDialog = it
+            }) {
+                Log.v("TesTes", "CustomDialog : $it")
+            }
 
-        Column(modifier = Modifier.padding(16.dp)) {
+        Column(
+            modifier = Modifier.padding(
+                start = 16.dp,
+                end = 16.dp,
+                top = 16.dp,
+                bottom = 16.dp
+            )
+        ) {
             CurrentTimeText()
             Spacer(Modifier.size(1.dp))
             UserName(name = userName.value, onNameChange = { viewModel.setUserName(it) })
@@ -179,6 +195,7 @@ class MainActivity : AppCompatActivity() {
             Button(
                 onClick = {
                     Log.v("TesTes", "Button.onClick.Break")
+                    showDialog = true
                 },
             ) {
                 Text("休憩")
