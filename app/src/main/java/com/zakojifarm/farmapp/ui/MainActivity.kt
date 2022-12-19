@@ -156,6 +156,10 @@ class MainActivity : AppCompatActivity() {
         val userName = viewModel.userName.collectAsState()
         val workStatus = viewModel.workStatus.collectAsState()
         val workKind = viewModel.workKind.collectAsState()
+        var currentWorkKind by remember {
+            mutableStateOf(WorkKind.MOWING)
+        }
+
 
         Column(modifier = Modifier.padding(16.dp)) {
             CurrentTimeText()
@@ -165,21 +169,33 @@ class MainActivity : AppCompatActivity() {
             WorkingStatus(workStatus.value, workKind.value)
             Spacer(Modifier.size(1.dp))
             Button(
-                onClick = { /* Do something */ },
+                onClick = {
+                    Log.v("TesTes", "Button.onClick.Duty Start")
+                },
             ) {
                 Text("勤務開始")
             }
             Spacer(Modifier.size(1.dp))
             Button(
-                onClick = { /* Do something */ },
+                onClick = {
+                    Log.v("TesTes", "Button.onClick.Break")
+                },
             ) {
                 Text("休憩")
             }
             Spacer(Modifier.size(1.dp))
             Button(
-                onClick = { /* Do something */ },
+                onClick = {
+                    Log.v("TesTes", "Button.onClick.Data Upload")
+                },
             ) {
                 Text("データアップロード")
+            }
+            WorkKindDropdownMenuBox(
+                currentWorkKind
+            ) {
+                currentWorkKind = it
+                Log.v("TesTes", "WorkKindDropdownMenu.Select.$it")
             }
         }
     }
@@ -263,15 +279,42 @@ class MainActivity : AppCompatActivity() {
         return df.format(zonedDt)
     }
 
+    @OptIn(ExperimentalMaterial3Api::class)
     @Composable
-    fun WorkKindButton(kind: WorkKind) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Text(
-                text = stringResource(R.string.working_status_title),
-                modifier = Modifier.padding(bottom = 8.dp),
-                style = MaterialTheme.typography.bodyMedium,
-                fontSize = 16.sp
+    fun WorkKindDropdownMenuBox(currentKind: WorkKind, onValueChanged: (WorkKind) -> Unit) {
+        val options = WorkKind.values().map { it.toString() }
+        var expanded by remember { mutableStateOf(false) }
+
+        ExposedDropdownMenuBox(
+            expanded = expanded,
+            onExpandedChange = { expanded = !expanded },
+        ) {
+            TextField(
+                modifier = Modifier.menuAnchor(),
+                readOnly = true,
+                value = currentKind.toString(),
+                onValueChange = { },
+                label = { Text("仕事内容") },
+                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+                colors = ExposedDropdownMenuDefaults.textFieldColors(),
             )
+            ExposedDropdownMenu(
+                expanded = expanded,
+                onDismissRequest = { expanded = false },
+            ) {
+                options.forEach { selectionOption ->
+                    DropdownMenuItem(
+                        text = { Text(selectionOption) },
+                        onClick = {
+                            expanded = false
+                            WorkKind.fromString(selectionOption)?.let {
+                                onValueChanged(it)
+                            }
+                        },
+                        contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding,
+                    )
+                }
+            }
         }
     }
 }

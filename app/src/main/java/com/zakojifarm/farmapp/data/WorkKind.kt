@@ -15,6 +15,7 @@ enum class WorkKind(val id: Int, @StringRes private val stringId: Int) : Parcela
     companion object {
         private val VALUES = values()
         fun fromId(id: Int) = VALUES.firstOrNull { it.id == id }
+        fun fromString(str: String) = VALUES.firstOrNull { it.toString() == str }
     }
 
     override fun toString(): String {
