@@ -35,6 +35,7 @@ import com.zakojifarm.farmapp.R
 import com.zakojifarm.farmapp.data.WorkKind
 import com.zakojifarm.farmapp.data.WorkStatus
 import com.zakojifarm.farmapp.ui.theme.AppTheme
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.time.Instant
@@ -44,6 +45,7 @@ import java.time.format.DateTimeFormatter
 import java.util.*
 import kotlin.concurrent.scheduleAtFixedRate
 
+@AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
 
     companion object {
