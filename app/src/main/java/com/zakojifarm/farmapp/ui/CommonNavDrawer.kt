@@ -1,6 +1,7 @@
 package com.zakojifarm.farmapp.ui
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -10,6 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
@@ -17,7 +19,7 @@ import androidx.compose.ui.unit.sp
 import com.zakojifarm.farmapp.R
 
 @Composable
-fun SideDrawer(modifier: Modifier = Modifier) {
+fun CommonNavDrawer(onClickHelp: (Int) -> Unit, modifier: Modifier = Modifier) {
     Column(
         modifier
             .fillMaxSize()
@@ -43,9 +45,10 @@ fun SideDrawer(modifier: Modifier = Modifier) {
         }
 
         Spacer(Modifier.height(24.dp))
-        Text(
-            text = stringResource(R.string.menu_help),
-            style = MaterialTheme.typography.labelLarge
+        ClickableText(
+            text = AnnotatedString(stringResource(R.string.menu_help)),
+            style = MaterialTheme.typography.labelLarge,
+            onClick = onClickHelp
         )
     }
 }

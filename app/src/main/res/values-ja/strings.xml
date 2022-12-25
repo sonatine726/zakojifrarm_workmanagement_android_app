@@ -10,4 +10,7 @@
     <string name="work_kind_mowing">草刈り</string>
     <string name="work_kind_tractor">トラクター</string>
     <string name="work_kind_others">その他作業</string>
+
+    <string name="menu_help">ヘルプ</string>
+    <string name="menu_app_copyright">Copyright © 2022 座光寺農園. All Rights Reserved.</string>
 </resources>
