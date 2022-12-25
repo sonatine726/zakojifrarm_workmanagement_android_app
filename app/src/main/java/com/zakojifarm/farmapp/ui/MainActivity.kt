@@ -64,7 +64,7 @@ class MainActivity : AppCompatActivity() {
 
         setContent {
             AppTheme {
-                HomeScreens(viewModel = viewModel)
+                Navigation(viewModel = viewModel)
             }
         }
 

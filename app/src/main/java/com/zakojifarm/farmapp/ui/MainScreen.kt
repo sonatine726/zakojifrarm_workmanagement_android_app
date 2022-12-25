@@ -4,20 +4,15 @@ import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.compose.rememberNavController
 import com.zakojifarm.farmapp.MainApplication
 import com.zakojifarm.farmapp.R
 import com.zakojifarm.farmapp.data.WorkKind
@@ -34,10 +29,13 @@ private const val TIME_TIMER_SCHEDULED_PERIOD_MS = 1000L
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreens(modifier: Modifier = Modifier, viewModel: WorkStatusViewModel) {
+fun MainScreen(
+    viewModel: WorkStatusViewModel,
+    onClickHelp: (Int) -> Unit,
+    modifier: Modifier = Modifier
+) {
     viewModel.setCurrentScreen(Screens.DrawerScreens.Home)
 
-    val navController = rememberNavController()
     val snackBarHostState = remember { SnackbarHostState() }
     val crScope = rememberCoroutineScope()
     val drawerState = rememberDrawerState(DrawerValue.Closed)
@@ -54,7 +52,10 @@ fun HomeScreens(modifier: Modifier = Modifier, viewModel: WorkStatusViewModel) {
                         RoundedCornerShape(topEnd = 16.dp, bottomEnd = 16.dp)
                     )
             ) {}
-            SideDrawer(modifier)
+            CommonNavDrawer(onClickHelp = {
+                crScope.launch { drawerState.close() }
+                onClickHelp(it)
+            }, modifier)
         },
         gesturesEnabled = true
     ) {
@@ -67,11 +68,11 @@ fun HomeScreens(modifier: Modifier = Modifier, viewModel: WorkStatusViewModel) {
                 )
             ),
             topBar = {
-                MainTopAppBar(onClickNavigationIcon = { crScope.launch { drawerState.open() } })
+                CommonTopAppBar(onClickNavigationIcon = { crScope.launch { drawerState.open() } })
             }
         ) { innerPadding ->
             Column(modifier = Modifier.padding(innerPadding)) {
-                MainScreen(viewModel, onDataUploadButtonClicked = {
+                MainWindow(viewModel, onDataUploadButtonClicked = {
                     crScope.launch {
                         snackBarHostState.showSnackbar(
                             "Snackbar Test"
@@ -83,48 +84,8 @@ fun HomeScreens(modifier: Modifier = Modifier, viewModel: WorkStatusViewModel) {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MainTopAppBar(onClickNavigationIcon: () -> Unit) {
-    val topAppBarState = rememberTopAppBarState()
-    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(topAppBarState)
-
-    CenterAlignedTopAppBar(
-        title = {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.End)
-            ) {
-                Text(text = stringResource(id = R.string.app_name))
-                Icon(
-                    painter = painterResource(R.drawable.main_icon),
-                    contentDescription = "Image",
-                    tint = Color.Unspecified,
-                    modifier = Modifier.size(width = 40.dp, height = 40.dp)
-                )
-            }
-        },
-        colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer
-        ),
-        scrollBehavior = scrollBehavior,
-        navigationIcon = {
-            IconButton(onClick = {
-                Log.v("MainTopAppBar", "navigationIcon onClick")
-                onClickNavigationIcon()
-            }) {
-                Icon(
-                    imageVector = Icons.Filled.Menu,
-                    contentDescription = "Localized description"
-                )
-            }
-        }
-    )
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun MainScreen(viewModel: WorkStatusViewModel, onDataUploadButtonClicked: () -> Unit) {
+fun MainWindow(viewModel: WorkStatusViewModel, onDataUploadButtonClicked: () -> Unit) {
     val userName = viewModel.userName.collectAsState()
     val workStatus = viewModel.workStatus.collectAsState()
     val workKind = viewModel.workKind.collectAsState()
