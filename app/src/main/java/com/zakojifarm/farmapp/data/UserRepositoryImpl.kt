@@ -1,8 +1,9 @@
 package com.zakojifarm.farmapp.data
 
 import kotlinx.coroutines.flow.Flow
+import javax.inject.Inject
 
-class UserRepositoryImpl(private val userDao: UserDao) : UserRepository {
+class UserRepositoryImpl @Inject constructor(private val userDao: UserDao) : UserRepository {
     override fun get(id: Int): Flow<UserEntity?> = userDao.get(id)
 
     override fun getAll(): Flow<List<UserEntity?>> = userDao.selectAll()

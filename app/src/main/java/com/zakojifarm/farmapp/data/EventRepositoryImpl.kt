@@ -1,8 +1,9 @@
 package com.zakojifarm.farmapp.data
 
 import kotlinx.coroutines.flow.Flow
+import javax.inject.Inject
 
-class EventRepositoryImpl(private val eventDao: EventDao) : EventRepository {
+class EventRepositoryImpl @Inject constructor(private val eventDao: EventDao) : EventRepository {
     override fun get(id: Int): Flow<EventEntity?> = eventDao.get(id)
 
     override fun getAll(): Flow<List<EventEntity?>> = eventDao.selectAll()

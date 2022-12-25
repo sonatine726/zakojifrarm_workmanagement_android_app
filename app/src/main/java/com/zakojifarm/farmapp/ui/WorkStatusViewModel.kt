@@ -1,12 +1,20 @@
 package com.zakojifarm.farmapp.ui
 
 import androidx.lifecycle.ViewModel
+import com.zakojifarm.farmapp.data.EventRepository
+import com.zakojifarm.farmapp.data.UserRepository
 import com.zakojifarm.farmapp.data.WorkKind
 import com.zakojifarm.farmapp.data.WorkStatus
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import javax.inject.Inject
 
-class WorkStatusViewModel : ViewModel() {
+@HiltViewModel
+class WorkStatusViewModel @Inject constructor(
+    private val userRepository: UserRepository,
+    private val eventRepository: EventRepository
+) : ViewModel() {
     private val _workStatus = MutableStateFlow(WorkStatus.OFF_DUTY)
     val workStatus: StateFlow<WorkStatus> = _workStatus
 
@@ -26,5 +34,12 @@ class WorkStatusViewModel : ViewModel() {
 
     fun setUserName(newName: String) {
         _userName.value = newName
+    }
+
+    private val _currentScreen = MutableStateFlow<Screens>(Screens.DrawerScreens.Home)
+    val currentScreen: StateFlow<Screens> = _currentScreen
+
+    fun setCurrentScreen(screen: Screens) {
+        _currentScreen.value = screen
     }
 }
