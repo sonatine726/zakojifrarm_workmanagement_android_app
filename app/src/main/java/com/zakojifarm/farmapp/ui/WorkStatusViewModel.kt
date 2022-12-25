@@ -35,4 +35,11 @@ class WorkStatusViewModel @Inject constructor(
     fun setUserName(newName: String) {
         _userName.value = newName
     }
+
+    private val _currentScreen = MutableStateFlow<Screens>(Screens.DrawerScreens.Home)
+    val currentScreen: StateFlow<Screens> = _currentScreen
+
+    fun setCurrentScreen(screen: Screens) {
+        _currentScreen.value = screen
+    }
 }

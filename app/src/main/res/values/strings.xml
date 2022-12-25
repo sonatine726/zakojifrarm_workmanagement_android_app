@@ -10,4 +10,6 @@
     <string name="work_kind_mowing">Mowing</string>
     <string name="work_kind_tractor">Tractor</string>
     <string name="work_kind_others">Others</string>
+
+    <string name="menu_help" translatable="false">Help</string>
 </resources>
