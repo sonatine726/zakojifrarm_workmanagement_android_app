@@ -158,7 +158,7 @@ fun MainWindow(viewModel: WorkStatusViewModel, onDataUploadButtonClicked: () -> 
         }
 
         if (events.value.isNotEmpty()) {
-            Row {
+            Column {
                 Log.v(TAG, "TesTes.1.${events.value.size}")
                 events.value.forEachIndexed { index, event ->
                     Text("$index. ${event.time},${event.kind},${event.workKind},${event.userId}")
