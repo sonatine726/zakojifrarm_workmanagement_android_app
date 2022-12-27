@@ -1,25 +1,24 @@
 package com.zakojifarm.farmapp.data
 
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
-class EventRepositoryImpl @Inject constructor(private val eventDao: EventDao) : EventRepository {
-    override fun get(id: Int): Flow<EventEntity?> = eventDao.get(id)
+class EventRepositoryImpl @Inject constructor(private val userDao: UserDao) : EventRepository {
 
-    override fun getAll(): Flow<List<EventEntity?>> = eventDao.selectAll()
+    override fun getAllOfUser(user: UserEntity): Flow<List<EventEntity>> =
+        userDao.selectUserAndEvents().map { it[user] ?: emptyList() }
+//        userDao.selectUserAndEvents().map { it[user] ?: emptyList() }
 
-    override fun getAllOfUser(user: UserEntity): Flow<List<EventEntity?>> =
-        eventDao.selectAllOfSpecificUser(user.id)
-
-    override fun getAllOfUser(user: UserEntity, limit: Int): Flow<List<EventEntity?>> =
-        eventDao.selectAllOfSpecificUser(user.id, limit)
+    override fun getAllOfUser(user: UserEntity, limit: Int): Flow<List<EventEntity>> =
+        userDao.selectUserAndEvents().map { it[user] ?: emptyList() }
 
     override suspend fun add(user: UserEntity, event: EventEntity) {
         event.userId = user.id
-        eventDao.insert(event)
+        userDao.insertEvent(event)
     }
 
-    override suspend fun update(event: EventEntity) = eventDao.update(event)
+    override suspend fun update(event: EventEntity) = userDao.updateEvent(event)
 
-    override suspend fun delete(event: EventEntity) = eventDao.delete(event)
+    override suspend fun delete(event: EventEntity) = userDao.deleteEvent(event)
 }

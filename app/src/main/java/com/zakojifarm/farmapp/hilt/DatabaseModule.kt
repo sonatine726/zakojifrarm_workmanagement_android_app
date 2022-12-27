@@ -36,10 +36,4 @@ object DatabaseModule {
         return Room.databaseBuilder(context, EventDatabase::class.java, EventDatabase.DB_FILE_NAME)
             .build()
     }
-
-    @Singleton
-    @Provides
-    fun provideEventDao(db: EventDatabase): EventDao {
-        return db.eventDao()
-    }
 }
