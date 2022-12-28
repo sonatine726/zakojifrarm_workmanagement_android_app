@@ -15,8 +15,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.zakojifarm.farmapp.MainApplication
 import com.zakojifarm.farmapp.R
-import com.zakojifarm.farmapp.data.WorkKind
-import com.zakojifarm.farmapp.data.WorkStatus
+import com.zakojifarm.farmapp.data.*
 import kotlinx.coroutines.launch
 import java.time.Instant
 import java.time.ZoneId
@@ -26,6 +25,7 @@ import java.util.*
 import kotlin.concurrent.scheduleAtFixedRate
 
 private const val TIME_TIMER_SCHEDULED_PERIOD_MS = 1000L
+private const val TAG = "MainScreen"
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -94,11 +94,21 @@ fun MainWindow(viewModel: WorkStatusViewModel, onDataUploadButtonClicked: () -> 
     }
     var showDialog by remember { mutableStateOf(false) }
 
+    val events = viewModel.events.collectAsState()
+
+    LaunchedEffect(true) {
+        Log.v(TAG, "MainWindow::LaunchedEffect")
+
+//        viewModel.addUser(UserEntity.create("Kubota", "Test"))
+        viewModel.addEvent(EventEntity.create(EventKind.START_WORK, WorkKind.OTHERS))
+        viewModel.updateEvents()
+    }
+
     if (showDialog)
         CustomDialog(value = "", setShowDialog = {
             showDialog = it
         }) {
-            Log.v("TesTes", "CustomDialog : $it")
+            Log.v(TAG, "CustomDialog : $it")
         }
 
     Column(
@@ -117,7 +127,7 @@ fun MainWindow(viewModel: WorkStatusViewModel, onDataUploadButtonClicked: () -> 
         Spacer(Modifier.size(1.dp))
         Button(
             onClick = {
-                Log.v("TesTes", "Button.onClick.Duty Start")
+                Log.v(TAG, "Button.onClick.Duty Start")
             },
         ) {
             Text("勤務開始")
@@ -125,7 +135,7 @@ fun MainWindow(viewModel: WorkStatusViewModel, onDataUploadButtonClicked: () -> 
         Spacer(Modifier.size(1.dp))
         Button(
             onClick = {
-                Log.v("TesTes", "Button.onClick.Break")
+                Log.v(TAG, "Button.onClick.Break")
                 showDialog = true
             },
         ) {
@@ -134,7 +144,7 @@ fun MainWindow(viewModel: WorkStatusViewModel, onDataUploadButtonClicked: () -> 
         Spacer(Modifier.size(1.dp))
         Button(
             onClick = {
-                Log.v("TesTes", "Button.onClick.Data Upload")
+                Log.v(TAG, "Button.onClick.Data Upload")
                 onDataUploadButtonClicked()
             },
         ) {
@@ -144,7 +154,16 @@ fun MainWindow(viewModel: WorkStatusViewModel, onDataUploadButtonClicked: () -> 
             currentWorkKind
         ) {
             currentWorkKind = it
-            Log.v("TesTes", "WorkKindDropdownMenu.Select.$it")
+            Log.v(TAG, "WorkKindDropdownMenu.Select.$it")
+        }
+
+        if (events.value.isNotEmpty()) {
+            Column {
+                Log.v(TAG, "TesTes.1.${events.value.size}")
+                events.value.forEachIndexed { index, event ->
+                    Text("$index. ${event.time},${event.kind},${event.workKind},${event.userId}")
+                }
+            }
         }
     }
 }
@@ -183,6 +202,7 @@ fun CurrentTimeText(timeUpdateMs: Long) {
     )
 
     LaunchedEffect(true) {
+        Log.v(TAG, "CurrentTimeText::LaunchedEffect")
         timeTimer?.run {
             cancel()
             timeTimer = null

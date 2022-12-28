@@ -5,8 +5,6 @@ import androidx.room.RoomDatabase
 
 @Database(entities = [EventEntity::class, UserEntity::class], version = 1)
 abstract class EventDatabase : RoomDatabase() {
-    abstract fun eventDao(): EventDao
-
     companion object {
         const val DB_NAME = "events"
         const val DB_FILE_NAME = "$DB_NAME.fb"
