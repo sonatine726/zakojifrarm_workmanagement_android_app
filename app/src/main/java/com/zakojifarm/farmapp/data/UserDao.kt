@@ -17,6 +17,23 @@ interface UserDao : BaseDao<UserEntity> {
     )
     fun selectUserAndEvents(): Flow<Map<UserEntity, List<EventEntity>>>
 
+    @Query(
+        "SELECT ${EventDatabase.DB_NAME}.event_id, ${EventDatabase.DB_NAME}.time, ${EventDatabase.DB_NAME}.kind, ${EventDatabase.DB_NAME}.work_kind, ${EventDatabase.DB_NAME}.user_id FROM ${UserDatabase.DB_NAME} " +
+                "JOIN ${EventDatabase.DB_NAME} ON ${UserDatabase.DB_NAME}.id = ${EventDatabase.DB_NAME}.user_id " +
+                "WHERE ${UserDatabase.DB_NAME}.id = :userId " +
+                "ORDER BY ${EventDatabase.DB_NAME}.time DESC"
+    )
+    fun selectEventsOfUser(userId: Long): Flow<List<EventEntity>>
+
+    @Query(
+        "SELECT ${EventDatabase.DB_NAME}.event_id, ${EventDatabase.DB_NAME}.time, ${EventDatabase.DB_NAME}.kind, ${EventDatabase.DB_NAME}.work_kind, ${EventDatabase.DB_NAME}.user_id FROM ${UserDatabase.DB_NAME} " +
+                "JOIN ${EventDatabase.DB_NAME} ON ${UserDatabase.DB_NAME}.id = ${EventDatabase.DB_NAME}.user_id " +
+                "WHERE ${UserDatabase.DB_NAME}.id = :userId " +
+                "ORDER BY ${EventDatabase.DB_NAME}.time DESC " +
+                "Limit :limit"
+    )
+    fun selectEventsOfUser(userId: Long, limit: Int): Flow<List<EventEntity>>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertEvent(event: EventEntity)
 

@@ -1,17 +1,15 @@
 package com.zakojifarm.farmapp.data
 
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
 class EventRepositoryImpl @Inject constructor(private val userDao: UserDao) : EventRepository {
 
     override fun getAllOfUser(user: UserEntity): Flow<List<EventEntity>> =
-        userDao.selectUserAndEvents().map { it[user] ?: emptyList() }
-//        userDao.selectUserAndEvents().map { it[user] ?: emptyList() }
+        userDao.selectEventsOfUser(user.id)
 
     override fun getAllOfUser(user: UserEntity, limit: Int): Flow<List<EventEntity>> =
-        userDao.selectUserAndEvents().map { it[user] ?: emptyList() }
+        userDao.selectEventsOfUser(user.id, limit)
 
     override suspend fun add(user: UserEntity, event: EventEntity) {
         event.userId = user.id
