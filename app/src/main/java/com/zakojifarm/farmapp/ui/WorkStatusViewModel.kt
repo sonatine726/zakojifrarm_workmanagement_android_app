@@ -26,8 +26,8 @@ class WorkStatusViewModel @Inject constructor(
     private val _workKind = MutableStateFlow(WorkKind.MOWING)
     val workKind: StateFlow<WorkKind> = _workKind
 
-    private val _userName = MutableStateFlow("")
-    val userName: StateFlow<String> = _userName
+    private val _isUserSignIn = MutableStateFlow(false)
+    val isUserSignIn: StateFlow<Boolean> = _isUserSignIn
 
     private val _user = MutableStateFlow<UserEntity?>(null)
     val user: StateFlow<UserEntity?> = _user
@@ -36,17 +36,22 @@ class WorkStatusViewModel @Inject constructor(
     val events: StateFlow<List<EventEntity>> = _events
 
     init {
-        updateUser()
+        signInUser()
         updateEvents()
     }
 
-    fun updateUser() {
+    private fun signInUser() {
         viewModelScope.launch(Dispatchers.IO) {
-            userRepository.getAll().collect {
-                it.firstOrNull()?.let { entity ->
-                    Log.v(TAG, "updateUser.$entity")
-                    _user.value = entity
-                }
+            checkUserSignIn()
+        }
+    }
+
+    suspend fun checkUserSignIn() {
+        userRepository.getAll().collect {
+            it.firstOrNull()?.let { entity ->
+                Log.v(TAG, "updateUser.$entity")
+                _user.value = entity
+                _isUserSignIn.value = true
             }
         }
     }
@@ -65,7 +70,7 @@ class WorkStatusViewModel @Inject constructor(
     fun addUser(user: UserEntity) {
         viewModelScope.launch(Dispatchers.IO) {
             userRepository.add(user)
-            updateUser()
+            signInUser()
         }
     }
 
@@ -88,14 +93,9 @@ class WorkStatusViewModel @Inject constructor(
         _workKind.value = newKind
     }
 
-    fun setUserName(newName: String) {
-        _userName.value = newName
-    }
-
-    private val _currentScreen = MutableStateFlow<Screens>(Screens.DrawerScreens.Home)
-    val currentScreen: StateFlow<Screens> = _currentScreen
-
-    fun setCurrentScreen(screen: Screens) {
-        _currentScreen.value = screen
+    fun initializeUser(name: String) {
+        _isUserSignIn.value = true
+        addUser(UserEntity.create(name))
+        signInUser()
     }
 }
