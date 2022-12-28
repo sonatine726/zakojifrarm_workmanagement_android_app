@@ -1,9 +1,7 @@
 package com.zakojifarm.farmapp.ui
 
 import android.util.Log
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -13,9 +11,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.zakojifarm.farmapp.MainApplication
+import androidx.navigation.NavHostController
 import com.zakojifarm.farmapp.R
 import com.zakojifarm.farmapp.data.*
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.time.Instant
 import java.time.ZoneId
@@ -31,62 +30,32 @@ private const val TAG = "MainScreen"
 @Composable
 fun MainScreen(
     viewModel: WorkStatusViewModel,
-    onClickHelp: (Int) -> Unit,
-    modifier: Modifier = Modifier
+    navController: NavHostController
 ) {
-    viewModel.setCurrentScreen(Screens.DrawerScreens.Home)
-
     val snackBarHostState = remember { SnackbarHostState() }
     val crScope = rememberCoroutineScope()
-    val drawerState = rememberDrawerState(DrawerValue.Closed)
 
-    ModalNavigationDrawer(
-        drawerState = drawerState,
-        drawerContent = {
-            Column(
-                modifier = Modifier
-                    .requiredWidth(250.dp)
-                    .fillMaxHeight()
-                    .background(
-                        MaterialTheme.colorScheme.background,
-                        RoundedCornerShape(topEnd = 16.dp, bottomEnd = 16.dp)
+    WindowTemplate(navController = navController) { innerPadding ->
+        Column(modifier = Modifier.padding(innerPadding)) {
+            MainWindow(viewModel, navController, onDataUploadButtonClicked = {
+                crScope.launch {
+                    snackBarHostState.showSnackbar(
+                        "Snackbar Test"
                     )
-            ) {}
-            CommonNavDrawer(onClickHelp = {
-                crScope.launch { drawerState.close() }
-                onClickHelp(it)
-            }, modifier)
-        },
-        gesturesEnabled = true
-    ) {
-        Scaffold(
-            snackbarHost = { SnackbarHost(snackBarHostState) },
-            containerColor = Color(
-                MainApplication.instance.resources.getColor(
-                    R.color.main_screen_bg_color,
-                    MainApplication.instance.theme
-                )
-            ),
-            topBar = {
-                CommonTopAppBar(onClickNavigationIcon = { crScope.launch { drawerState.open() } })
-            }
-        ) { innerPadding ->
-            Column(modifier = Modifier.padding(innerPadding)) {
-                MainWindow(viewModel, onDataUploadButtonClicked = {
-                    crScope.launch {
-                        snackBarHostState.showSnackbar(
-                            "Snackbar Test"
-                        )
-                    }
-                })
-            }
+                }
+            })
         }
     }
 }
 
 @Composable
-fun MainWindow(viewModel: WorkStatusViewModel, onDataUploadButtonClicked: () -> Unit) {
-    val userName = viewModel.userName.collectAsState()
+fun MainWindow(
+    viewModel: WorkStatusViewModel,
+    navController: NavHostController,
+    onDataUploadButtonClicked: () -> Unit
+) {
+    val isUserSignIn = viewModel.isUserSignIn.collectAsState()
+    val user = viewModel.user.collectAsState()
     val workStatus = viewModel.workStatus.collectAsState()
     val workKind = viewModel.workKind.collectAsState()
     var currentWorkKind by remember {
@@ -98,6 +67,17 @@ fun MainWindow(viewModel: WorkStatusViewModel, onDataUploadButtonClicked: () -> 
 
     LaunchedEffect(true) {
         Log.v(TAG, "MainWindow::LaunchedEffect")
+
+        if (!isUserSignIn.value) {
+            launch(Dispatchers.IO) {
+                viewModel.checkUserSignIn()
+            }.join()
+
+            if (!isUserSignIn.value) {
+                navController.navigate(Screens.MainScreens.SignUp.route)
+            }
+        }
+
 
 //        viewModel.addUser(UserEntity.create("Kubota", "Test"))
         viewModel.addEvent(EventEntity.create(EventKind.START_WORK, WorkKind.OTHERS))
@@ -111,79 +91,60 @@ fun MainWindow(viewModel: WorkStatusViewModel, onDataUploadButtonClicked: () -> 
             Log.v(TAG, "CustomDialog : $it")
         }
 
-    Column(
-        modifier = Modifier.padding(
-            start = 16.dp,
-            end = 16.dp,
-            top = 16.dp,
-            bottom = 16.dp
-        )
-    ) {
-        CurrentTimeText(TIME_TIMER_SCHEDULED_PERIOD_MS)
-        Spacer(Modifier.size(1.dp))
-        UserName(name = userName.value, onNameChange = { viewModel.setUserName(it) })
-        Spacer(Modifier.size(1.dp))
-        WorkingStatus(workStatus.value, workKind.value)
-        Spacer(Modifier.size(1.dp))
-        Button(
-            onClick = {
-                Log.v(TAG, "Button.onClick.Duty Start")
-            },
+    if (isUserSignIn.value) {
+        Column(
+            modifier = Modifier.padding(
+                start = 16.dp,
+                end = 16.dp,
+                top = 16.dp,
+                bottom = 16.dp
+            )
         ) {
-            Text("勤務開始")
-        }
-        Spacer(Modifier.size(1.dp))
-        Button(
-            onClick = {
-                Log.v(TAG, "Button.onClick.Break")
-                showDialog = true
-            },
-        ) {
-            Text("休憩")
-        }
-        Spacer(Modifier.size(1.dp))
-        Button(
-            onClick = {
-                Log.v(TAG, "Button.onClick.Data Upload")
-                onDataUploadButtonClicked()
-            },
-        ) {
-            Text("データアップロード")
-        }
-        WorkKindDropdownMenuBox(
-            currentWorkKind
-        ) {
-            currentWorkKind = it
-            Log.v(TAG, "WorkKindDropdownMenu.Select.$it")
-        }
+            CurrentTimeText(TIME_TIMER_SCHEDULED_PERIOD_MS)
+            Spacer(Modifier.size(1.dp))
+            WorkingStatus(workStatus.value, workKind.value)
+            Spacer(Modifier.size(1.dp))
+            Button(
+                onClick = {
+                    Log.v(TAG, "Button.onClick.Duty Start")
+                },
+            ) {
+                Text("勤務開始")
+            }
+            Spacer(Modifier.size(1.dp))
+            Button(
+                onClick = {
+                    Log.v(TAG, "Button.onClick.Break")
+                    showDialog = true
+                },
+            ) {
+                Text("休憩")
+            }
+            Spacer(Modifier.size(1.dp))
+            Button(
+                onClick = {
+                    Log.v(TAG, "Button.onClick.Data Upload")
+                    onDataUploadButtonClicked()
+                },
+            ) {
+                Text("データアップロード")
+            }
+            WorkKindDropdownMenuBox(
+                currentWorkKind
+            ) {
+                currentWorkKind = it
+                Log.v(TAG, "WorkKindDropdownMenu.Select.$it")
+            }
 
-        if (events.value.isNotEmpty()) {
-            Column {
-                Log.v(TAG, "TesTes.1.${events.value.size}")
-                events.value.forEachIndexed { index, event ->
-                    Text("$index. ${event.time},${event.kind},${event.workKind},${event.userId}")
+            if (events.value.isNotEmpty()) {
+                Column {
+                    Log.v(TAG, "TesTes.1.${events.value.size}")
+                    events.value.forEachIndexed { index, event ->
+                        Text("$index. ${event.time},${event.kind},${event.workKind},${event.userId}")
+                    }
                 }
             }
         }
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun UserName(name: String, onNameChange: (String) -> Unit) {
-    Column(modifier = Modifier.padding(16.dp)) {
-        if (name.isNotEmpty()) {
-            Text(
-                text = "Hello, $name",
-                modifier = Modifier.padding(bottom = 8.dp),
-                style = MaterialTheme.typography.bodyLarge
-            )
-        }
-        OutlinedTextField(
-            value = name,
-            onValueChange = onNameChange,
-            label = { Text("Name") }
-        )
     }
 }
 

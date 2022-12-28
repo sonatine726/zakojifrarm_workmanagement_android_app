@@ -9,6 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
@@ -19,7 +20,7 @@ import androidx.compose.ui.unit.sp
 import com.zakojifarm.farmapp.R
 
 @Composable
-fun CommonNavDrawer(onClickHelp: (Int) -> Unit, modifier: Modifier = Modifier) {
+fun CommonNavDrawer(onClickHome: (Int) -> Unit, onClickHelp: (Int) -> Unit, modifier: Modifier = Modifier) {
     Column(
         modifier
             .fillMaxSize()
@@ -45,10 +46,30 @@ fun CommonNavDrawer(onClickHelp: (Int) -> Unit, modifier: Modifier = Modifier) {
         }
 
         Spacer(Modifier.height(24.dp))
-        ClickableText(
-            text = AnnotatedString(stringResource(R.string.menu_help)),
-            style = MaterialTheme.typography.labelLarge,
-            onClick = onClickHelp
-        )
+        Row {
+            ClickableText(
+                text = AnnotatedString(stringResource(R.string.menu_home)),
+                style = MaterialTheme.typography.labelLarge,
+                onClick = onClickHome
+            )
+            Icon(
+                painter = rememberVectorPainter(image = Screens.MainScreens.Home.icon),
+                contentDescription = stringResource(R.string.menu_home),
+                modifier = Modifier.padding(4.dp),
+            )
+        }
+
+        Row {
+            ClickableText(
+                text = AnnotatedString(stringResource(R.string.menu_help)),
+                style = MaterialTheme.typography.labelLarge,
+                onClick = onClickHelp
+            )
+            Icon(
+                painter = rememberVectorPainter(image = Screens.MainScreens.Help.icon),
+                contentDescription = stringResource(R.string.menu_help),
+                modifier = Modifier.padding(4.dp),
+            )
+        }
     }
 }

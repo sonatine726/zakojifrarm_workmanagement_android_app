@@ -1,12 +1,14 @@
 package com.zakojifarm.farmapp.ui
 
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Help
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Login
 import androidx.compose.ui.graphics.vector.ImageVector
 
 sealed class Screens(val route: String, val title: String) {
 
-    sealed class HomeScreens(
+    sealed class MainScreens(
         route: String,
         title: String,
         val icon: ImageVector
@@ -14,25 +16,8 @@ sealed class Screens(val route: String, val title: String) {
         route,
         title
     ) {
-        object Main : HomeScreens("main", "Home", Icons.Filled.Home)
-    }
-
-    sealed class DrawerScreens(
-        route: String,
-        title: String
-    ) : Screens(route, title) {
-        object Home : DrawerScreens("home", "Home")
-        object Account : DrawerScreens("account", "Account")
-        object Help : DrawerScreens("help", "Help")
+        object Home : MainScreens("home", "Home", Icons.Filled.Home)
+        object SignUp : MainScreens("sign_up", "Sign Up", Icons.Filled.Login)
+        object Help : MainScreens("help", "Help", Icons.Filled.Help)
     }
 }
-
-val screensInHomeFromBottomNav = listOf(
-    Screens.HomeScreens.Main
-)
-
-val screensFromDrawer = listOf(
-    Screens.DrawerScreens.Home,
-    Screens.DrawerScreens.Account,
-    Screens.DrawerScreens.Help,
-)
