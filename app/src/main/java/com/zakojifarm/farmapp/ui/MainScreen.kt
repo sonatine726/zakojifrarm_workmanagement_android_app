@@ -16,6 +16,7 @@ import com.zakojifarm.farmapp.R
 import com.zakojifarm.farmapp.data.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.time.Instant
 import java.time.ZoneId
 import java.time.ZonedDateTime
@@ -71,17 +72,21 @@ fun MainWindow(
         if (!isUserSignIn.value) {
             launch(Dispatchers.IO) {
                 viewModel.checkUserSignIn()
-            }.join()
 
-            if (!isUserSignIn.value) {
-                navController.navigate(Screens.MainScreens.SignUp.route)
+                Log.v(TAG, "TesTes.MainWindow::LaunchedEffect.${isUserSignIn.value}")
+                if (!isUserSignIn.value) {
+                    Log.v(TAG, "TesTes.5")
+                    withContext(Dispatchers.Main) {
+                        navController.navigate(Screens.MainScreens.SignUp.route)
+                    }
+                }
             }
         }
 
 
 //        viewModel.addUser(UserEntity.create("Kubota", "Test"))
         viewModel.addEvent(EventEntity.create(EventKind.START_WORK, WorkKind.OTHERS))
-        viewModel.updateEvents()
+//        viewModel.updateEvents()
     }
 
     if (showDialog)

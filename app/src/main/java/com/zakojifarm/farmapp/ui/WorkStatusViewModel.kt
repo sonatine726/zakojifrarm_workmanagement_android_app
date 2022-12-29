@@ -46,14 +46,15 @@ class WorkStatusViewModel @Inject constructor(
         }
     }
 
-    suspend fun checkUserSignIn() {
-        userRepository.getAll().collect {
-            it.firstOrNull()?.let { entity ->
-                Log.v(TAG, "updateUser.$entity")
-                _user.value = entity
-                _isUserSignIn.value = true
-            }
+    fun checkUserSignIn() {
+        val userEntities = userRepository.getAll()
+        Log.v(TAG, "TesTes.3.$userEntities")
+        userEntities.firstOrNull()?.let { entity ->
+            Log.v(TAG, "updateUser.$entity")
+            _user.value = entity
+            _isUserSignIn.value = true
         }
+        Log.v(TAG, "TesTes.4.${_isUserSignIn.value}")
     }
 
     fun updateEvents() {

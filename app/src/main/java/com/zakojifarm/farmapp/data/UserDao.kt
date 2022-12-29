@@ -9,7 +9,10 @@ interface UserDao : BaseDao<UserEntity> {
     fun get(id: Int): Flow<UserEntity?>
 
     @Query("SELECT * FROM ${UserDatabase.DB_NAME}")
-    fun selectAll(): Flow<List<UserEntity>>
+    fun selectAll(): List<UserEntity>
+
+    @Query("SELECT * FROM ${UserDatabase.DB_NAME}")
+    fun selectAllByFlow(): Flow<List<UserEntity>>
 
     @Query(
         "SELECT * FROM ${UserDatabase.DB_NAME} " +

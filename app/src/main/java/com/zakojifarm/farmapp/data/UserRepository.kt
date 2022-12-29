@@ -5,7 +5,9 @@ import kotlinx.coroutines.flow.Flow
 interface UserRepository {
     fun get(id: Int): Flow<UserEntity?>
 
-    fun getAll(): Flow<List<UserEntity?>>
+    fun getAll(): List<UserEntity>
+
+    fun getAllByFlow(): Flow<List<UserEntity?>>
 
     fun getAllWithEvents(): Flow<Map<UserEntity, List<EventEntity>>>
 

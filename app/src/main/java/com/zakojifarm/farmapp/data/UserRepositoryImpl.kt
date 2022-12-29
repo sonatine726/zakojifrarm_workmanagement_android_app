@@ -7,7 +7,9 @@ import javax.inject.Inject
 class UserRepositoryImpl @Inject constructor(private val userDao: UserDao) : UserRepository {
     override fun get(id: Int): Flow<UserEntity?> = userDao.get(id)
 
-    override fun getAll(): Flow<List<UserEntity?>> = userDao.selectAll()
+    override fun getAll(): List<UserEntity> = userDao.selectAll()
+
+    override fun getAllByFlow(): Flow<List<UserEntity?>> = userDao.selectAllByFlow()
 
     override fun getAllWithEvents(): Flow<Map<UserEntity, List<EventEntity>>> =
         userDao.selectUserAndEvents()
