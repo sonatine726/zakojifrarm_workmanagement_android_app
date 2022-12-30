@@ -20,7 +20,11 @@ import androidx.compose.ui.unit.sp
 import com.zakojifarm.farmapp.R
 
 @Composable
-fun CommonNavDrawer(onClickHome: (Int) -> Unit, onClickHelp: (Int) -> Unit, modifier: Modifier = Modifier) {
+fun CommonNavDrawer(
+    onClickHome: (Int) -> Unit,
+    onClickHelp: (Int) -> Unit,
+    modifier: Modifier = Modifier
+) {
     Column(
         modifier
             .fillMaxSize()
@@ -46,7 +50,7 @@ fun CommonNavDrawer(onClickHome: (Int) -> Unit, onClickHelp: (Int) -> Unit, modi
         }
 
         Spacer(Modifier.height(24.dp))
-        Row {
+        Row(verticalAlignment = Alignment.CenterVertically) {
             ClickableText(
                 text = AnnotatedString(stringResource(R.string.menu_home)),
                 style = MaterialTheme.typography.labelLarge,
@@ -59,7 +63,7 @@ fun CommonNavDrawer(onClickHome: (Int) -> Unit, onClickHelp: (Int) -> Unit, modi
             )
         }
 
-        Row {
+        Row(verticalAlignment = Alignment.CenterVertically) {
             ClickableText(
                 text = AnnotatedString(stringResource(R.string.menu_help)),
                 style = MaterialTheme.typography.labelLarge,

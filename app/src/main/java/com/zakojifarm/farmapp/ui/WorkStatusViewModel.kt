@@ -6,6 +6,8 @@ import androidx.lifecycle.viewModelScope
 import com.zakojifarm.farmapp.data.*
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -35,9 +37,10 @@ class WorkStatusViewModel @Inject constructor(
     private val _events = MutableStateFlow(emptyList<EventEntity>())
     val events: StateFlow<List<EventEntity>> = _events
 
+    private var collectingEventJob: Job? = null
+
     init {
         signInUser()
-        updateEvents()
     }
 
     private fun signInUser() {
@@ -53,16 +56,20 @@ class WorkStatusViewModel @Inject constructor(
             Log.v(TAG, "updateUser.$entity")
             _user.value = entity
             _isUserSignIn.value = true
+            launchCollectingEvents()
         }
-        Log.v(TAG, "TesTes.4.${_isUserSignIn.value}")
     }
 
-    fun updateEvents() {
+    private fun launchCollectingEvents() {
         user.value?.let { user ->
-            viewModelScope.launch(Dispatchers.IO) {
-                eventRepository.getAllOfUser(user).collect {
-                    Log.v(TAG, "updateEvents.$it")
-                    _events.value = it
+            viewModelScope.launch(Dispatchers.IO){
+                collectingEventJob?.cancelAndJoin()
+
+                collectingEventJob = viewModelScope.launch(Dispatchers.IO) {
+                    eventRepository.getAllOfUserByFlow(user).collect {
+                        Log.v(TAG, "updateEvents.$it")
+                        _events.value = it
+                    }
                 }
             }
         }
@@ -81,7 +88,6 @@ class WorkStatusViewModel @Inject constructor(
             viewModelScope.launch(Dispatchers.IO) {
                 Log.v(TAG, "addEvent.$it,$event")
                 eventRepository.add(it, event)
-                updateEvents()
             }
         }
     }

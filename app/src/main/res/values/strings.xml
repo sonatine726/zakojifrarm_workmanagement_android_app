@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">ZakojiFarm App</string>
 
+    <string name="worker_name_title">Worker Name</string>
     <string name="working_status_title">Working Status</string>
 
     <string name="work_status_off_duty">Off Duty</string>

@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
@@ -73,9 +74,7 @@ fun MainWindow(
             launch(Dispatchers.IO) {
                 viewModel.checkUserSignIn()
 
-                Log.v(TAG, "TesTes.MainWindow::LaunchedEffect.${isUserSignIn.value}")
                 if (!isUserSignIn.value) {
-                    Log.v(TAG, "TesTes.5")
                     withContext(Dispatchers.Main) {
                         navController.navigate(Screens.MainScreens.SignUp.route)
                     }
@@ -103,12 +102,12 @@ fun MainWindow(
                 end = 16.dp,
                 top = 16.dp,
                 bottom = 16.dp
-            )
+            ),
+            verticalArrangement = Arrangement.spacedBy(1.dp)
         ) {
             CurrentTimeText(TIME_TIMER_SCHEDULED_PERIOD_MS)
-            Spacer(Modifier.size(1.dp))
+            WorkerName(user.value)
             WorkingStatus(workStatus.value, workKind.value)
-            Spacer(Modifier.size(1.dp))
             Button(
                 onClick = {
                     Log.v(TAG, "Button.onClick.Duty Start")
@@ -116,7 +115,6 @@ fun MainWindow(
             ) {
                 Text("勤務開始")
             }
-            Spacer(Modifier.size(1.dp))
             Button(
                 onClick = {
                     Log.v(TAG, "Button.onClick.Break")
@@ -125,7 +123,6 @@ fun MainWindow(
             ) {
                 Text("休憩")
             }
-            Spacer(Modifier.size(1.dp))
             Button(
                 onClick = {
                     Log.v(TAG, "Button.onClick.Data Upload")
@@ -180,6 +177,41 @@ fun CurrentTimeText(timeUpdateMs: Long) {
                 timeUpdateMs
             ) {
                 currentMs = System.currentTimeMillis()
+            }
+        }
+    }
+}
+
+@Composable
+private fun WorkerName(userEntity: UserEntity?) {
+    if (userEntity != null) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(1.dp)
+        ) {
+            Text(
+                text = stringResource(R.string.worker_name_title),
+                modifier = Modifier.padding(bottom = 8.dp),
+                style = MaterialTheme.typography.bodyMedium,
+                fontSize = 16.sp
+            )
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.padding(bottom = 8.dp),
+                horizontalArrangement = Arrangement.spacedBy(20.dp)
+            ) {
+                Text(
+                    text = userEntity.name,
+                    style = MaterialTheme.typography.bodyLarge,
+                    fontSize = 24.sp
+                )
+                if (userEntity.explanation != null) {
+                    Text(
+                        text = userEntity.explanation,
+                        style = MaterialTheme.typography.bodySmall,
+                        fontSize = 16.sp
+                    )
+                }
             }
         }
     }

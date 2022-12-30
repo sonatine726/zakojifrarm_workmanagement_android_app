@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">お米の座光寺農園 App</string>
 
+    <string name="worker_name_title">名前</string>
     <string name="working_status_title">勤務状況</string>
 
     <string name="work_status_off_duty">勤務外</string>
