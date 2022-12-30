@@ -9,6 +9,7 @@ import androidx.navigation.compose.rememberNavController
 @Composable
 fun Navigation(viewModel: WorkStatusViewModel) {
     val navController = rememberNavController()
+
     NavHost(
         navController = navController,
         startDestination = Screens.MainScreens.Home.route
