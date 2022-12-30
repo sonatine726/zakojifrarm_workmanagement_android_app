@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
@@ -16,8 +17,9 @@ import com.zakojifarm.farmapp.R
 import com.zakojifarm.farmapp.data.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.time.Instant
-import java.time.ZoneId
+import java.time.ZoneOffset
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import java.util.*
@@ -25,6 +27,8 @@ import kotlin.concurrent.scheduleAtFixedRate
 
 private const val TIME_TIMER_SCHEDULED_PERIOD_MS = 1000L
 private const val TAG = "MainScreen"
+
+private const val WORK_KIND_TEXT_ALPHA_IN_NOT_WORKING_STATUS = 0.5f
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -39,6 +43,7 @@ fun MainScreen(
         Column(modifier = Modifier.padding(innerPadding)) {
             MainWindow(viewModel, navController, onDataUploadButtonClicked = {
                 crScope.launch {
+                    Log.v(TAG, "TesTes.5")
                     snackBarHostState.showSnackbar(
                         "Snackbar Test"
                     )
@@ -56,14 +61,16 @@ fun MainWindow(
 ) {
     val isUserSignIn = viewModel.isUserSignIn.collectAsState()
     val user = viewModel.user.collectAsState()
-    val workStatus = viewModel.workStatus.collectAsState()
-    val workKind = viewModel.workKind.collectAsState()
     var currentWorkKind by remember {
-        mutableStateOf(WorkKind.MOWING)
+        mutableStateOf(WorkKind.OTHERS)
     }
     var showDialog by remember { mutableStateOf(false) }
 
-    val events = viewModel.events.collectAsState()
+    val todayEvents = viewModel.todayEvents.collectAsState()
+    currentWorkKind =
+        if (todayEvents.value.isEmpty()) WorkKind.OTHERS else todayEvents.value[0].workKind
+    val workStatus =
+        if (todayEvents.value.isEmpty()) WorkStatus.OFF_DUTY else todayEvents.value[0].kind.workStatus
 
     LaunchedEffect(true) {
         Log.v(TAG, "MainWindow::LaunchedEffect")
@@ -71,17 +78,20 @@ fun MainWindow(
         if (!isUserSignIn.value) {
             launch(Dispatchers.IO) {
                 viewModel.checkUserSignIn()
-            }.join()
 
-            if (!isUserSignIn.value) {
-                navController.navigate(Screens.MainScreens.SignUp.route)
+                if (!isUserSignIn.value) {
+                    withContext(Dispatchers.Main) {
+                        navController.navigate(Screens.MainScreens.SignUp.route)
+                    }
+                }
             }
         }
 
 
 //        viewModel.addUser(UserEntity.create("Kubota", "Test"))
-        viewModel.addEvent(EventEntity.create(EventKind.START_WORK, WorkKind.OTHERS))
-        viewModel.updateEvents()
+//        viewModel.addEvent(EventEntity.create(EventKind.START_WORK, WorkKind.OTHERS))
+//        viewModel.updateEvents()
+//        viewModel.deleteAllEvent()
     }
 
     if (showDialog)
@@ -98,52 +108,44 @@ fun MainWindow(
                 end = 16.dp,
                 top = 16.dp,
                 bottom = 16.dp
-            )
+            ),
+            verticalArrangement = Arrangement.spacedBy(1.dp)
         ) {
             CurrentTimeText(TIME_TIMER_SCHEDULED_PERIOD_MS)
-            Spacer(Modifier.size(1.dp))
-            WorkingStatus(workStatus.value, workKind.value)
-            Spacer(Modifier.size(1.dp))
-            Button(
-                onClick = {
-                    Log.v(TAG, "Button.onClick.Duty Start")
-                },
-            ) {
-                Text("勤務開始")
+            WorkerName(user.value)
+            WorkingStatus(workStatus, currentWorkKind)
+            StartOrEndWorkButton(workStatus) {
+                val event =
+                    if (it == StartOrEndWork.START_WORK) EventKind.START_WORK else EventKind.END_WORK
+                viewModel.addEvent(EventEntity.create(event, currentWorkKind))
             }
-            Spacer(Modifier.size(1.dp))
-            Button(
-                onClick = {
-                    Log.v(TAG, "Button.onClick.Break")
-                    showDialog = true
-                },
-            ) {
-                Text("休憩")
+            BreakButton(workStatus) {
+                val event =
+                    if (workStatus == WorkStatus.BREAK) EventKind.END_BREAK else EventKind.START_BREAK
+                viewModel.addEvent(EventEntity.create(event, currentWorkKind))
             }
-            Spacer(Modifier.size(1.dp))
             Button(
                 onClick = {
                     Log.v(TAG, "Button.onClick.Data Upload")
                     onDataUploadButtonClicked()
                 },
             ) {
-                Text("データアップロード")
+                Text(stringResource(R.string.data_upload))
             }
             WorkKindDropdownMenuBox(
                 currentWorkKind
             ) {
-                currentWorkKind = it
                 Log.v(TAG, "WorkKindDropdownMenu.Select.$it")
+                viewModel.addEvent(EventEntity.create(EventKind.CHANGE_WORK, it))
             }
-
-            if (events.value.isNotEmpty()) {
-                Column {
-                    Log.v(TAG, "TesTes.1.${events.value.size}")
-                    events.value.forEachIndexed { index, event ->
-                        Text("$index. ${event.time},${event.kind},${event.workKind},${event.userId}")
-                    }
-                }
-            }
+//
+//            if (todayEvents.value.isNotEmpty()) {
+//                Column {
+//                    todayEvents.value.forEachIndexed { index, event ->
+//                        Text("$index. ${event.time},${event.kind},${event.workKind},${event.userId}")
+//                    }
+//                }
+//            }
         }
     }
 }
@@ -181,28 +183,85 @@ fun CurrentTimeText(timeUpdateMs: Long) {
 }
 
 @Composable
-fun WorkingStatus(status: WorkStatus, kind: WorkKind) {
-    Column(modifier = Modifier.padding(16.dp)) {
+private fun WorkerName(userEntity: UserEntity?) {
+    if (userEntity != null) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(1.dp)
+        ) {
+            Text(
+                text = stringResource(R.string.worker_name_title),
+                modifier = Modifier.padding(bottom = 8.dp),
+                style = MaterialTheme.typography.bodyMedium,
+                fontSize = 16.sp
+            )
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.padding(bottom = 8.dp),
+                horizontalArrangement = Arrangement.spacedBy(20.dp)
+            ) {
+                Text(
+                    text = userEntity.name,
+                    style = MaterialTheme.typography.bodyLarge,
+                    fontSize = 30.sp
+                )
+                if (userEntity.explanation != null) {
+                    Text(
+                        text = userEntity.explanation,
+                        style = MaterialTheme.typography.bodySmall,
+                        fontSize = 16.sp
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun WorkingStatus(status: WorkStatus, workKind: WorkKind?) {
+    Column(
+        modifier = Modifier.padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(1.dp)
+    ) {
         Text(
             text = stringResource(R.string.working_status_title),
             modifier = Modifier.padding(bottom = 8.dp),
             style = MaterialTheme.typography.bodyMedium,
             fontSize = 16.sp
         )
-        Spacer(Modifier.size(1.dp))
-        Text(
-            text = "$status : $kind",
+        Row(
+            verticalAlignment = Alignment.Bottom,
             modifier = Modifier.padding(bottom = 8.dp),
-            style = MaterialTheme.typography.bodyLarge,
-            fontSize = 24.sp
-        )
+            horizontalArrangement = Arrangement.spacedBy(20.dp)
+        ) {
+            Text(
+                text = status.toString(),
+                style = MaterialTheme.typography.bodyLarge,
+                fontSize = 30.sp
+            )
+            if (status != WorkStatus.OFF_DUTY && workKind != null) {
+                val kindTextStyle = MaterialTheme.typography.bodySmall
+                Text(
+                    text = workKind.toString(),
+                    style = kindTextStyle,
+                    fontSize = 16.sp,
+                    color = Color(
+                        kindTextStyle.color.red,
+                        kindTextStyle.color.green,
+                        kindTextStyle.color.blue,
+                        if (status == WorkStatus.WORKING) 1f else WORK_KIND_TEXT_ALPHA_IN_NOT_WORKING_STATUS,
+                        kindTextStyle.color.colorSpace
+                    )
+                )
+            }
+        }
     }
 }
 
 private fun currentTimeStr(timeMs: Long): String {
     val zonedDt = ZonedDateTime.ofInstant(
         Instant.ofEpochMilli(timeMs),
-        ZoneId.of("Asia/Tokyo")
+        ZoneOffset.systemDefault()
     )
 
     val df = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss")
@@ -245,5 +304,37 @@ fun WorkKindDropdownMenuBox(currentKind: WorkKind, onValueChanged: (WorkKind) ->
                 )
             }
         }
+    }
+}
+
+private enum class StartOrEndWork {
+    START_WORK,
+    END_WORK
+}
+
+@Composable
+private fun StartOrEndWorkButton(workStatus: WorkStatus, onClicked: (StartOrEndWork) -> Unit) {
+    Button(
+        onClick = {
+            val startOrEnd =
+                if (workStatus == WorkStatus.WORKING) StartOrEndWork.END_WORK else StartOrEndWork.START_WORK
+            onClicked(startOrEnd)
+        }
+    ) {
+        val titleStrId =
+            if (workStatus == WorkStatus.WORKING) R.string.end_work else R.string.start_work
+        Text(stringResource(titleStrId))
+    }
+}
+
+@Composable
+private fun BreakButton(workStatus: WorkStatus, onClicked: () -> Unit) {
+    Button(
+        onClick = onClicked,
+        enabled = workStatus != WorkStatus.OFF_DUTY
+    ) {
+        val titleStrId =
+            if (workStatus == WorkStatus.BREAK) R.string.return_from_break else R.string.break_work
+        Text(stringResource(titleStrId))
     }
 }

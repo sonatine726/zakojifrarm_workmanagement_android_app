@@ -6,6 +6,8 @@ import androidx.lifecycle.viewModelScope
 import com.zakojifarm.farmapp.data.*
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -18,13 +20,10 @@ class WorkStatusViewModel @Inject constructor(
 ) : ViewModel() {
     companion object {
         private val TAG = WorkStatusViewModel::class.java.simpleName
+
+        private const val LIMIT_OF_COLLECTING_LATEST_EVENTS = 6
+
     }
-
-    private val _workStatus = MutableStateFlow(WorkStatus.OFF_DUTY)
-    val workStatus: StateFlow<WorkStatus> = _workStatus
-
-    private val _workKind = MutableStateFlow(WorkKind.MOWING)
-    val workKind: StateFlow<WorkKind> = _workKind
 
     private val _isUserSignIn = MutableStateFlow(false)
     val isUserSignIn: StateFlow<Boolean> = _isUserSignIn
@@ -32,12 +31,17 @@ class WorkStatusViewModel @Inject constructor(
     private val _user = MutableStateFlow<UserEntity?>(null)
     val user: StateFlow<UserEntity?> = _user
 
-    private val _events = MutableStateFlow(emptyList<EventEntity>())
-    val events: StateFlow<List<EventEntity>> = _events
+    private val _latestEvents = MutableStateFlow(emptyList<EventEntity>())
+    val latestEvents: StateFlow<List<EventEntity>> = _latestEvents
+
+    private val _todayEvents = MutableStateFlow(emptyList<EventEntity>())
+    val todayEvents: StateFlow<List<EventEntity>> = _todayEvents
+
+    private var collectingLatestEventJob: Job? = null
+    private var collectingTodayEventJob: Job? = null
 
     init {
         signInUser()
-        updateEvents()
     }
 
     private fun signInUser() {
@@ -46,22 +50,51 @@ class WorkStatusViewModel @Inject constructor(
         }
     }
 
-    suspend fun checkUserSignIn() {
-        userRepository.getAll().collect {
-            it.firstOrNull()?.let { entity ->
-                Log.v(TAG, "updateUser.$entity")
-                _user.value = entity
-                _isUserSignIn.value = true
-            }
+    fun checkUserSignIn() {
+        val userEntities = userRepository.getAll()
+        Log.v(TAG, "TesTes.3.$userEntities")
+        userEntities.firstOrNull()?.let { entity ->
+            Log.v(TAG, "updateUser.$entity")
+            _user.value = entity
+            _isUserSignIn.value = true
+            launchCollectingEvents()
         }
     }
 
-    fun updateEvents() {
+    private fun launchCollectingEvents() {
         user.value?.let { user ->
             viewModelScope.launch(Dispatchers.IO) {
-                eventRepository.getAllOfUser(user).collect {
-                    Log.v(TAG, "updateEvents.$it")
-                    _events.value = it
+                collectingTodayEventJob?.cancelAndJoin()
+
+                collectingTodayEventJob = viewModelScope.launch(Dispatchers.IO) {
+                    eventRepository.getTodayAllOfUserByFlow(user).collect {
+                        Log.v(TAG, "getTodayAllOfUserByFlow update.$it")
+                        _todayEvents.value = it
+                        _latestEvents.value = when {
+                            it.isEmpty() -> emptyList()
+                            it.size == 1 -> it.slice(0..0)
+                            else -> it.slice(0..1)
+                        }
+                    }
+                }
+
+                viewModelScope.launch(Dispatchers.IO) {
+                    collectingTodayEventJob?.cancelAndJoin()
+                    collectingTodayEventJob = viewModelScope.launch(Dispatchers.IO) {
+                        eventRepository.getTodayAllOfUserByFlow(user).collect {
+                            Log.v(TAG, "getTodayAllOfUserByFlow update.$it")
+                            _todayEvents.value = it
+                        }
+                    }
+
+                    collectingLatestEventJob?.cancelAndJoin()
+                    collectingLatestEventJob = viewModelScope.launch(Dispatchers.IO) {
+                        eventRepository.getAllOfUserByFlow(user, LIMIT_OF_COLLECTING_LATEST_EVENTS)
+                            .collect {
+                                Log.v(TAG, "getAllOfUserByFlow update.$it")
+                                _latestEvents.value = it
+                            }
+                    }
                 }
             }
         }
@@ -80,22 +113,21 @@ class WorkStatusViewModel @Inject constructor(
             viewModelScope.launch(Dispatchers.IO) {
                 Log.v(TAG, "addEvent.$it,$event")
                 eventRepository.add(it, event)
-                updateEvents()
             }
         }
-    }
-
-    fun setWorkStatus(newStatus: WorkStatus) {
-        _workStatus.value = newStatus
-    }
-
-    fun setWorkKind(newKind: WorkKind) {
-        _workKind.value = newKind
     }
 
     fun initializeUser(name: String) {
         _isUserSignIn.value = true
         addUser(UserEntity.create(name))
         signInUser()
+    }
+
+    fun deleteAllEvent() {
+        user.value?.let {
+            viewModelScope.launch(Dispatchers.IO) {
+                eventRepository.deleteAllOfUser(it)
+            }
+        }
     }
 }

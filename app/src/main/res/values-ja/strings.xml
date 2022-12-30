@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">お米の座光寺農園 App</string>
 
+    <string name="worker_name_title">名前</string>
     <string name="working_status_title">勤務状況</string>
 
     <string name="work_status_off_duty">勤務外</string>
@@ -16,4 +17,12 @@
     <string name="menu_app_copyright">Copyright © 2022 座光寺農園. All Rights Reserved.</string>
 
     <string name="signup_text_field_title">ユーザー名を入力してください</string>
+
+    <string name="start_work">勤務開始</string>
+    <string name="end_work">勤務終了</string>
+
+    <string name="break_work">休憩開始</string>
+    <string name="return_from_break">休憩終了</string>
+
+    <string name="data_upload">データアップロード</string>
 </resources>
