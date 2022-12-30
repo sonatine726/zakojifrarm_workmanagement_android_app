@@ -11,9 +11,13 @@ interface EventRepository {
 
     fun getAllOfUserByFlow(user: UserEntity, limit: Int): Flow<List<EventEntity>>
 
+    fun getTodayAllOfUserByFlow(user: UserEntity): Flow<List<EventEntity>>
+
     suspend fun add(user: UserEntity, event: EventEntity)
 
     suspend fun update(event: EventEntity)
 
     suspend fun delete(event: EventEntity)
+
+    suspend fun deleteAllOfUser(user: UserEntity)
 }

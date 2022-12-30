@@ -20,13 +20,10 @@ class WorkStatusViewModel @Inject constructor(
 ) : ViewModel() {
     companion object {
         private val TAG = WorkStatusViewModel::class.java.simpleName
+
+        private const val LIMIT_OF_COLLECTING_LATEST_EVENTS = 6
+
     }
-
-    private val _workStatus = MutableStateFlow(WorkStatus.OFF_DUTY)
-    val workStatus: StateFlow<WorkStatus> = _workStatus
-
-    private val _workKind = MutableStateFlow(WorkKind.MOWING)
-    val workKind: StateFlow<WorkKind> = _workKind
 
     private val _isUserSignIn = MutableStateFlow(false)
     val isUserSignIn: StateFlow<Boolean> = _isUserSignIn
@@ -34,10 +31,14 @@ class WorkStatusViewModel @Inject constructor(
     private val _user = MutableStateFlow<UserEntity?>(null)
     val user: StateFlow<UserEntity?> = _user
 
-    private val _events = MutableStateFlow(emptyList<EventEntity>())
-    val events: StateFlow<List<EventEntity>> = _events
+    private val _latestEvents = MutableStateFlow(emptyList<EventEntity>())
+    val latestEvents: StateFlow<List<EventEntity>> = _latestEvents
 
-    private var collectingEventJob: Job? = null
+    private val _todayEvents = MutableStateFlow(emptyList<EventEntity>())
+    val todayEvents: StateFlow<List<EventEntity>> = _todayEvents
+
+    private var collectingLatestEventJob: Job? = null
+    private var collectingTodayEventJob: Job? = null
 
     init {
         signInUser()
@@ -62,13 +63,37 @@ class WorkStatusViewModel @Inject constructor(
 
     private fun launchCollectingEvents() {
         user.value?.let { user ->
-            viewModelScope.launch(Dispatchers.IO){
-                collectingEventJob?.cancelAndJoin()
+            viewModelScope.launch(Dispatchers.IO) {
+                collectingTodayEventJob?.cancelAndJoin()
 
-                collectingEventJob = viewModelScope.launch(Dispatchers.IO) {
-                    eventRepository.getAllOfUserByFlow(user).collect {
-                        Log.v(TAG, "updateEvents.$it")
-                        _events.value = it
+                collectingTodayEventJob = viewModelScope.launch(Dispatchers.IO) {
+                    eventRepository.getTodayAllOfUserByFlow(user).collect {
+                        Log.v(TAG, "getTodayAllOfUserByFlow update.$it")
+                        _todayEvents.value = it
+                        _latestEvents.value = when {
+                            it.isEmpty() -> emptyList()
+                            it.size == 1 -> it.slice(0..0)
+                            else -> it.slice(0..1)
+                        }
+                    }
+                }
+
+                viewModelScope.launch(Dispatchers.IO) {
+                    collectingTodayEventJob?.cancelAndJoin()
+                    collectingTodayEventJob = viewModelScope.launch(Dispatchers.IO) {
+                        eventRepository.getTodayAllOfUserByFlow(user).collect {
+                            Log.v(TAG, "getTodayAllOfUserByFlow update.$it")
+                            _todayEvents.value = it
+                        }
+                    }
+
+                    collectingLatestEventJob?.cancelAndJoin()
+                    collectingLatestEventJob = viewModelScope.launch(Dispatchers.IO) {
+                        eventRepository.getAllOfUserByFlow(user, LIMIT_OF_COLLECTING_LATEST_EVENTS)
+                            .collect {
+                                Log.v(TAG, "getAllOfUserByFlow update.$it")
+                                _latestEvents.value = it
+                            }
                     }
                 }
             }
@@ -92,17 +117,17 @@ class WorkStatusViewModel @Inject constructor(
         }
     }
 
-    fun setWorkStatus(newStatus: WorkStatus) {
-        _workStatus.value = newStatus
-    }
-
-    fun setWorkKind(newKind: WorkKind) {
-        _workKind.value = newKind
-    }
-
     fun initializeUser(name: String) {
         _isUserSignIn.value = true
         addUser(UserEntity.create(name))
         signInUser()
+    }
+
+    fun deleteAllEvent() {
+        user.value?.let {
+            viewModelScope.launch(Dispatchers.IO) {
+                eventRepository.deleteAllOfUser(it)
+            }
+        }
     }
 }
