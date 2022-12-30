@@ -34,17 +34,20 @@ private const val WORK_KIND_TEXT_ALPHA_IN_NOT_WORKING_STATUS = 0.5f
 @Composable
 fun MainScreen(
     viewModel: WorkStatusViewModel,
-    navController: NavHostController
+    navController: NavHostController,
+    snackbarHostState: SnackbarHostState
 ) {
-    val snackBarHostState = remember { SnackbarHostState() }
     val crScope = rememberCoroutineScope()
 
-    WindowTemplate(navController = navController) { innerPadding ->
+    WindowTemplate(
+        navController = navController,
+        snackbarHostState = snackbarHostState
+    ) { innerPadding ->
         Column(modifier = Modifier.padding(innerPadding)) {
             MainWindow(viewModel, navController, onDataUploadButtonClicked = {
                 crScope.launch {
                     Log.v(TAG, "TesTes.5")
-                    snackBarHostState.showSnackbar(
+                    snackbarHostState.showSnackbar(
                         "Snackbar Test"
                     )
                 }

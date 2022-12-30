@@ -16,8 +16,11 @@ import com.zakojifarm.farmapp.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HelpScreen(navController: NavHostController) {
-    WindowTemplate(navController = navController) { innerPadding ->
+fun HelpScreen(navController: NavHostController, snackbarHostState: SnackbarHostState) {
+    WindowTemplate(
+        navController = navController,
+        snackbarHostState = snackbarHostState
+    ) { innerPadding ->
         Column(modifier = Modifier.padding(innerPadding)) {
             Row(
                 verticalAlignment = Alignment.CenterVertically

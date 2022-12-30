@@ -11,10 +11,17 @@ import com.zakojifarm.farmapp.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SignUpScreen(navController: NavHostController, onInitializeUserName: (String) -> Unit) {
-    var inputName by remember { mutableStateOf("")}
+fun SignUpScreen(
+    navController: NavHostController,
+    snackbarHostState: SnackbarHostState,
+    onInitializeUserName: (String) -> Unit
+) {
+    var inputName by remember { mutableStateOf("") }
 
-    WindowTemplate(navController = navController) { innerPadding ->
+    WindowTemplate(
+        navController = navController,
+        snackbarHostState = snackbarHostState
+    ) { innerPadding ->
         Column(modifier = Modifier.padding(innerPadding)) {
             OutlinedTextField(
                 value = inputName,

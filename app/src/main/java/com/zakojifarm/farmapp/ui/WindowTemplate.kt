@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -28,9 +27,9 @@ fun WindowTemplate(
     gesturesEnabled: Boolean = true,
     scrimColor: Color = DrawerDefaults.scrimColor,
     navController: NavHostController,
+    snackbarHostState: SnackbarHostState,
     content: @Composable (PaddingValues) -> Unit
 ) {
-    val snackBarHostState = remember { SnackbarHostState() }
     val crScope = rememberCoroutineScope()
     val drawerState = rememberDrawerState(DrawerValue.Closed)
 
@@ -74,7 +73,7 @@ fun WindowTemplate(
         scrimColor
     ) {
         Scaffold(
-            snackbarHost = { SnackbarHost(snackBarHostState) },
+            snackbarHost = { snackbarHostState },
             containerColor = Color(
                 MainApplication.instance.resources.getColor(
                     R.color.main_screen_bg_color,
