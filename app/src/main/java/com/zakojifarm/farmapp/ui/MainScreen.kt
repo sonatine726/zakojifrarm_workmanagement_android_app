@@ -34,17 +34,20 @@ private const val WORK_KIND_TEXT_ALPHA_IN_NOT_WORKING_STATUS = 0.5f
 @Composable
 fun MainScreen(
     viewModel: WorkStatusViewModel,
-    navController: NavHostController
+    navController: NavHostController,
+    snackbarHostState: SnackbarHostState
 ) {
-    val snackBarHostState = remember { SnackbarHostState() }
     val crScope = rememberCoroutineScope()
 
-    WindowTemplate(navController = navController) { innerPadding ->
+    WindowTemplate(
+        navController = navController,
+        snackbarHostState = snackbarHostState
+    ) { innerPadding ->
         Column(modifier = Modifier.padding(innerPadding)) {
             MainWindow(viewModel, navController, onDataUploadButtonClicked = {
                 crScope.launch {
                     Log.v(TAG, "TesTes.5")
-                    snackBarHostState.showSnackbar(
+                    snackbarHostState.showSnackbar(
                         "Snackbar Test"
                     )
                 }
@@ -116,7 +119,7 @@ fun MainWindow(
             WorkingStatus(workStatus, currentWorkKind)
             StartOrEndWorkButton(workStatus) {
                 val event =
-                    if (it == StartOrEndWork.START_WORK) EventKind.START_WORK else EventKind.END_WORK
+                    if (workStatus != WorkStatus.OFF_DUTY) EventKind.END_WORK else EventKind.START_WORK
                 viewModel.addEvent(EventEntity.create(event, currentWorkKind))
             }
             BreakButton(workStatus) {
@@ -124,6 +127,14 @@ fun MainWindow(
                     if (workStatus == WorkStatus.BREAK) EventKind.END_BREAK else EventKind.START_BREAK
                 viewModel.addEvent(EventEntity.create(event, currentWorkKind))
             }
+            WorkKindDropdownMenuBox(
+                workStatus,
+                currentWorkKind
+            ) {
+                Log.v(TAG, "WorkKindDropdownMenu.Select.$it")
+                viewModel.addEvent(EventEntity.create(EventKind.CHANGE_WORK, it))
+            }
+            Spacer(Modifier.height(40.dp))
             Button(
                 onClick = {
                     Log.v(TAG, "Button.onClick.Data Upload")
@@ -132,12 +143,7 @@ fun MainWindow(
             ) {
                 Text(stringResource(R.string.data_upload))
             }
-            WorkKindDropdownMenuBox(
-                currentWorkKind
-            ) {
-                Log.v(TAG, "WorkKindDropdownMenu.Select.$it")
-                viewModel.addEvent(EventEntity.create(EventKind.CHANGE_WORK, it))
-            }
+
 //
 //            if (todayEvents.value.isNotEmpty()) {
 //                Column {
@@ -218,7 +224,7 @@ private fun WorkerName(userEntity: UserEntity?) {
 }
 
 @Composable
-fun WorkingStatus(status: WorkStatus, workKind: WorkKind?) {
+fun WorkingStatus(workStatus: WorkStatus, workKind: WorkKind?) {
     Column(
         modifier = Modifier.padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(1.dp)
@@ -235,11 +241,16 @@ fun WorkingStatus(status: WorkStatus, workKind: WorkKind?) {
             horizontalArrangement = Arrangement.spacedBy(20.dp)
         ) {
             Text(
-                text = status.toString(),
+                text = workStatus.toString(),
                 style = MaterialTheme.typography.bodyLarge,
-                fontSize = 30.sp
+                fontSize = 30.sp,
+                color = when (workStatus) {
+                    WorkStatus.WORKING -> Color.Green
+                    WorkStatus.BREAK -> Color.Magenta
+                    else -> MaterialTheme.typography.bodyLarge.color
+                }
             )
-            if (status != WorkStatus.OFF_DUTY && workKind != null) {
+            if (workStatus != WorkStatus.OFF_DUTY && workKind != null) {
                 val kindTextStyle = MaterialTheme.typography.bodySmall
                 Text(
                     text = workKind.toString(),
@@ -249,7 +260,7 @@ fun WorkingStatus(status: WorkStatus, workKind: WorkKind?) {
                         kindTextStyle.color.red,
                         kindTextStyle.color.green,
                         kindTextStyle.color.blue,
-                        if (status == WorkStatus.WORKING) 1f else WORK_KIND_TEXT_ALPHA_IN_NOT_WORKING_STATUS,
+                        if (workStatus == WorkStatus.WORKING) 1f else WORK_KIND_TEXT_ALPHA_IN_NOT_WORKING_STATUS,
                         kindTextStyle.color.colorSpace
                     )
                 )
@@ -270,7 +281,11 @@ private fun currentTimeStr(timeMs: Long): String {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun WorkKindDropdownMenuBox(currentKind: WorkKind, onValueChanged: (WorkKind) -> Unit) {
+fun WorkKindDropdownMenuBox(
+    workStatus: WorkStatus,
+    currentKind: WorkKind,
+    onValueChanged: (WorkKind) -> Unit
+) {
     val options = WorkKind.values().map { it.toString() }
     var expanded by remember { mutableStateOf(false) }
 
@@ -286,6 +301,7 @@ fun WorkKindDropdownMenuBox(currentKind: WorkKind, onValueChanged: (WorkKind) ->
             label = { Text("仕事内容") },
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
             colors = ExposedDropdownMenuDefaults.textFieldColors(),
+            enabled = workStatus == WorkStatus.WORKING
         )
         ExposedDropdownMenu(
             expanded = expanded,
@@ -307,19 +323,10 @@ fun WorkKindDropdownMenuBox(currentKind: WorkKind, onValueChanged: (WorkKind) ->
     }
 }
 
-private enum class StartOrEndWork {
-    START_WORK,
-    END_WORK
-}
-
 @Composable
-private fun StartOrEndWorkButton(workStatus: WorkStatus, onClicked: (StartOrEndWork) -> Unit) {
+private fun StartOrEndWorkButton(workStatus: WorkStatus, onClicked: () -> Unit) {
     Button(
-        onClick = {
-            val startOrEnd =
-                if (workStatus == WorkStatus.WORKING) StartOrEndWork.END_WORK else StartOrEndWork.START_WORK
-            onClicked(startOrEnd)
-        }
+        onClick = onClicked
     ) {
         val titleStrId =
             if (workStatus == WorkStatus.WORKING) R.string.end_work else R.string.start_work
