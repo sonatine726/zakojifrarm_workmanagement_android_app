@@ -19,7 +19,9 @@ fun Navigation(viewModel: WorkStatusViewModel) {
     ) {
         val onInitializeUserName = { name: String ->
             viewModel.initializeUser(name)
-            navController.navigate(Screens.MainScreens.Home.route)
+            navController.navigate(Screens.MainScreens.Home.route) {
+                launchSingleTop = true
+            }
         }
 
         composable(Screens.MainScreens.Home.route) {
