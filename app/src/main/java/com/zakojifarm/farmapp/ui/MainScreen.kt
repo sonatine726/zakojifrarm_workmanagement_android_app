@@ -42,6 +42,15 @@ fun MainScreen(
         navController = navController
     ) { innerPadding, snackbarHostState ->
         Column(modifier = Modifier.padding(innerPadding)) {
+            var showDialog by remember { mutableStateOf(false) }
+
+            if (showDialog)
+                CustomDialog(value = "", setShowDialog = {
+                    showDialog = it
+                }) {
+                    Log.v(TAG, "CustomDialog : $it")
+                }
+
             MainWindow(viewModel, navController, onDataUploadButtonClicked = {
                 crScope.launch {
                     Log.v(TAG, "TesTes.5")
@@ -139,6 +148,7 @@ fun MainWindow(
                 onClick = {
                     Log.v(TAG, "Button.onClick.Data Upload")
                     onDataUploadButtonClicked()
+                    showDialog = true
                 },
             ) {
                 Text(stringResource(R.string.data_upload))
