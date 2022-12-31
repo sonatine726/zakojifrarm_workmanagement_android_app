@@ -1,8 +1,6 @@
 package com.zakojifarm.farmapp.ui
 
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -11,7 +9,6 @@ import androidx.navigation.compose.rememberNavController
 @Composable
 fun Navigation(viewModel: WorkStatusViewModel) {
     val navController = rememberNavController()
-    val snackBarHostState = remember { SnackbarHostState() }
 
     NavHost(
         navController = navController,
@@ -27,18 +24,15 @@ fun Navigation(viewModel: WorkStatusViewModel) {
         composable(Screens.MainScreens.Home.route) {
             MainScreen(
                 viewModel,
-                navController,
-                snackBarHostState
+                navController
             )
         }
         composable(Screens.MainScreens.SignUp.route) {
-            SignUpScreen(navController,
-                snackBarHostState, onInitializeUserName = { onInitializeUserName(it) })
+            SignUpScreen(navController, onInitializeUserName = { onInitializeUserName(it) })
         }
         composable(Screens.MainScreens.Help.route) {
             HelpScreen(
-                navController,
-                snackBarHostState
+                navController
             )
         }
     }
