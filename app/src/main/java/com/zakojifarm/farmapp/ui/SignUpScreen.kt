@@ -13,15 +13,13 @@ import com.zakojifarm.farmapp.R
 @Composable
 fun SignUpScreen(
     navController: NavHostController,
-    snackbarHostState: SnackbarHostState,
     onInitializeUserName: (String) -> Unit
 ) {
     var inputName by remember { mutableStateOf("") }
 
     WindowTemplate(
-        navController = navController,
-        snackbarHostState = snackbarHostState
-    ) { innerPadding ->
+        navController = navController
+    ) { innerPadding, _ ->
         Column(modifier = Modifier.padding(innerPadding)) {
             OutlinedTextField(
                 value = inputName,
