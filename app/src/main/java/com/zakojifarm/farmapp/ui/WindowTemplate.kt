@@ -35,12 +35,16 @@ fun WindowTemplate(
 
     val onClickHome = { _: Int ->
         Log.v(TAG, "onClickHome")
-        navController.navigate(Screens.MainScreens.Home.route)
+        navController.navigate(Screens.MainScreens.Home.route) {
+            launchSingleTop = true
+        }
     }
 
     val onClickHelp = { _: Int ->
         Log.v(TAG, "onClickHelp")
-        navController.navigate(Screens.MainScreens.Help.route)
+        navController.navigate(Screens.MainScreens.Help.route) {
+            launchSingleTop = true
+        }
     }
 
     return ModalNavigationDrawer(

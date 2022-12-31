@@ -84,7 +84,9 @@ fun MainWindow(
 
                 if (!isUserSignIn.value) {
                     withContext(Dispatchers.Main) {
-                        navController.navigate(Screens.MainScreens.SignUp.route)
+                        navController.navigate(Screens.MainScreens.SignUp.route) {
+                            launchSingleTop = true
+                        }
                     }
                 }
             }
