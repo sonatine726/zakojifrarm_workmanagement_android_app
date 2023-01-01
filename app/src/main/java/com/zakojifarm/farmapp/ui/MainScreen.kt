@@ -2,6 +2,8 @@ package com.zakojifarm.farmapp.ui
 
 import android.util.Log
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -13,6 +15,13 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+
+import com.google.android.gms.maps.model.CameraPosition
+import com.google.android.gms.maps.model.LatLng
+import com.google.maps.android.compose.GoogleMap
+import com.google.maps.android.compose.Marker
+import com.google.maps.android.compose.MarkerState
+import com.google.maps.android.compose.rememberCameraPositionState
 import com.zakojifarm.farmapp.R
 import com.zakojifarm.farmapp.data.*
 import kotlinx.coroutines.Dispatchers
@@ -41,7 +50,11 @@ fun MainScreen(
     WindowTemplate(
         navController = navController
     ) { innerPadding, snackbarHostState ->
-        Column(modifier = Modifier.padding(innerPadding)) {
+        Column(
+            modifier = Modifier
+                .padding(innerPadding)
+                .verticalScroll(rememberScrollState())
+        ) {
             var showDialog by remember { mutableStateOf(false) }
 
             if (showDialog)
@@ -81,6 +94,11 @@ fun MainWindow(
         if (todayEvents.value.isEmpty()) WorkKind.OTHERS else todayEvents.value[0].workKind
     val workStatus =
         if (todayEvents.value.isEmpty()) WorkStatus.OFF_DUTY else todayEvents.value[0].kind.workStatus
+
+    val singapore = LatLng(1.35, 103.87)
+    val cameraPositionState = rememberCameraPositionState {
+        position = CameraPosition.fromLatLngZoom(singapore, 10f)
+    }
 
     LaunchedEffect(true) {
         Log.v(TAG, "MainWindow::LaunchedEffect")
@@ -144,6 +162,19 @@ fun MainWindow(
                 viewModel.addEvent(EventEntity.create(EventKind.CHANGE_WORK, it))
             }
             Spacer(Modifier.height(40.dp))
+
+            GoogleMap(
+                modifier = Modifier
+                    .height(400.dp)
+                    .fillMaxWidth(),
+                cameraPositionState = cameraPositionState
+            ) {
+                Marker(
+                    state = MarkerState(position = singapore),
+                    title = "Singapore",
+                    snippet = "Marker in Singapore"
+                )
+            }
             Button(
                 onClick = {
                     Log.v(TAG, "Button.onClick.Data Upload")
