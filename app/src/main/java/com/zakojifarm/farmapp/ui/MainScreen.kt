@@ -95,11 +95,6 @@ fun MainWindow(
     val workStatus =
         if (todayEvents.value.isEmpty()) WorkStatus.OFF_DUTY else todayEvents.value[0].kind.workStatus
 
-    val singapore = LatLng(1.35, 103.87)
-    val cameraPositionState = rememberCameraPositionState {
-        position = CameraPosition.fromLatLngZoom(singapore, 10f)
-    }
-
     LaunchedEffect(true) {
         Log.v(TAG, "MainWindow::LaunchedEffect")
 
@@ -116,7 +111,6 @@ fun MainWindow(
                 }
             }
         }
-
 
 //        viewModel.addUser(UserEntity.create("Kubota", "Test"))
 //        viewModel.addEvent(EventEntity.create(EventKind.START_WORK, WorkKind.OTHERS))
@@ -162,19 +156,7 @@ fun MainWindow(
                 viewModel.addEvent(EventEntity.create(EventKind.CHANGE_WORK, it))
             }
             Spacer(Modifier.height(40.dp))
-
-            GoogleMap(
-                modifier = Modifier
-                    .height(400.dp)
-                    .fillMaxWidth(),
-                cameraPositionState = cameraPositionState
-            ) {
-                Marker(
-                    state = MarkerState(position = singapore),
-                    title = "Singapore",
-                    snippet = "Marker in Singapore"
-                )
-            }
+            WorkLocationMap(viewModel)
             Button(
                 onClick = {
                     Log.v(TAG, "Button.onClick.Data Upload")
@@ -384,5 +366,38 @@ private fun BreakButton(workStatus: WorkStatus, onClicked: () -> Unit) {
         val titleStrId =
             if (workStatus == WorkStatus.BREAK) R.string.return_from_break else R.string.break_work
         Text(stringResource(titleStrId))
+    }
+}
+
+@Composable
+private fun WorkLocationMap(viewModel: WorkStatusViewModel) {
+    val isRequestedLocationUpdates = viewModel.isRequestedLocationUpdates.collectAsState()
+    if (isRequestedLocationUpdates.value) {
+        val currentLocation = viewModel.currentLatLng.collectAsState()
+        Log.v(TAG, "TesTes.8.$currentLocation")
+
+        val cameraPositionState = rememberCameraPositionState {
+            position = CameraPosition.fromLatLngZoom(
+                currentLocation.value, 18f
+            )
+        }
+
+        GoogleMap(
+            modifier = Modifier
+                .height(400.dp)
+                .fillMaxWidth(),
+            cameraPositionState = cameraPositionState
+        ) {
+            Marker(
+                state = MarkerState(
+                    position = LatLng(
+                        currentLocation.value.latitude,
+                        currentLocation.value.longitude
+                    )
+                ),
+                title = "Current Position",
+                snippet = "Current Position"
+            )
+        }
     }
 }
