@@ -378,7 +378,7 @@ private fun WorkLocationMap(viewModel: WorkStatusViewModel) {
 
         val cameraPositionState = rememberCameraPositionState {
             position = CameraPosition.fromLatLngZoom(
-                currentLocation.value, 18f
+                currentLocation.value, 16f
             )
         }
 
