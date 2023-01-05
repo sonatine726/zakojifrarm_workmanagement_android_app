@@ -3,6 +3,7 @@ package com.zakojifarm.farmapp.ui
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.android.gms.maps.model.LatLng
 import com.zakojifarm.farmapp.data.*
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -39,6 +40,12 @@ class WorkStatusViewModel @Inject constructor(
 
     private var collectingLatestEventJob: Job? = null
     private var collectingTodayEventJob: Job? = null
+
+    private val _isRequestedLocationUpdates = MutableStateFlow(false)
+    val isRequestedLocationUpdates: StateFlow<Boolean> = _isRequestedLocationUpdates
+
+    private val _currentLatLng = MutableStateFlow(LatLng(0.0, 0.0))
+    val currentLatLng: StateFlow<LatLng> = _currentLatLng
 
     init {
         signInUser()
@@ -129,5 +136,13 @@ class WorkStatusViewModel @Inject constructor(
                 eventRepository.deleteAllOfUser(it)
             }
         }
+    }
+
+    fun setIsRequestedLocationUpdates(value: Boolean) {
+        _isRequestedLocationUpdates.value = value
+    }
+
+    fun setCurrentLocation(value: LatLng) {
+        _currentLatLng.value = value
     }
 }

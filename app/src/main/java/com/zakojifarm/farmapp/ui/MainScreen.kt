@@ -2,6 +2,8 @@ package com.zakojifarm.farmapp.ui
 
 import android.util.Log
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -13,6 +15,13 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+
+import com.google.android.gms.maps.model.CameraPosition
+import com.google.android.gms.maps.model.LatLng
+import com.google.maps.android.compose.GoogleMap
+import com.google.maps.android.compose.Marker
+import com.google.maps.android.compose.MarkerState
+import com.google.maps.android.compose.rememberCameraPositionState
 import com.zakojifarm.farmapp.R
 import com.zakojifarm.farmapp.data.*
 import kotlinx.coroutines.Dispatchers
@@ -41,7 +50,11 @@ fun MainScreen(
     WindowTemplate(
         navController = navController
     ) { innerPadding, snackbarHostState ->
-        Column(modifier = Modifier.padding(innerPadding)) {
+        Column(
+            modifier = Modifier
+                .padding(innerPadding)
+                .verticalScroll(rememberScrollState())
+        ) {
             var showDialog by remember { mutableStateOf(false) }
 
             if (showDialog)
@@ -99,7 +112,6 @@ fun MainWindow(
             }
         }
 
-
 //        viewModel.addUser(UserEntity.create("Kubota", "Test"))
 //        viewModel.addEvent(EventEntity.create(EventKind.START_WORK, WorkKind.OTHERS))
 //        viewModel.updateEvents()
@@ -144,6 +156,7 @@ fun MainWindow(
                 viewModel.addEvent(EventEntity.create(EventKind.CHANGE_WORK, it))
             }
             Spacer(Modifier.height(40.dp))
+            WorkLocationMap(viewModel)
             Button(
                 onClick = {
                     Log.v(TAG, "Button.onClick.Data Upload")
@@ -353,5 +366,47 @@ private fun BreakButton(workStatus: WorkStatus, onClicked: () -> Unit) {
         val titleStrId =
             if (workStatus == WorkStatus.BREAK) R.string.return_from_break else R.string.break_work
         Text(stringResource(titleStrId))
+    }
+}
+
+@Composable
+private fun WorkLocationMap(viewModel: WorkStatusViewModel) {
+    val isRequestedLocationUpdates = viewModel.isRequestedLocationUpdates.collectAsState()
+    if (isRequestedLocationUpdates.value) {
+        val currentLocation = viewModel.currentLatLng.collectAsState()
+
+        val cameraPositionState = rememberCameraPositionState {
+            position = CameraPosition.fromLatLngZoom(
+                currentLocation.value, 16f
+            )
+        }
+
+
+        LaunchedEffect(currentLocation) {
+            snapshotFlow { currentLocation.value }
+                .collect {
+                    cameraPositionState.position =
+                        CameraPosition.fromLatLngZoom(it, cameraPositionState.position.zoom)
+                    Log.v(TAG, "TesTes.10")
+                }
+        }
+
+        GoogleMap(
+            modifier = Modifier
+                .height(400.dp)
+                .fillMaxWidth(),
+            cameraPositionState = cameraPositionState
+        ) {
+            Marker(
+                state = MarkerState(
+                    position = LatLng(
+                        currentLocation.value.latitude,
+                        currentLocation.value.longitude
+                    )
+                ),
+                title = "Current Position",
+                snippet = "Current Position"
+            )
+        }
     }
 }

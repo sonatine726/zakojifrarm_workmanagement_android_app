@@ -53,6 +53,7 @@ android {
 
 dependencies {
     implementation("androidx.glance:glance-appwidget:1.0.0-alpha05")
+    implementation("com.google.android.libraries.maps:maps:3.1.0-beta")
     val activityVersion = "1.5.1"
 
     implementation("androidx.core:core-ktx:1.9.0")
@@ -88,6 +89,10 @@ dependencies {
     implementation("androidx.navigation:navigation-ui-ktx:$navVersion")
     implementation("androidx.navigation:navigation-dynamic-features-fragment:$navVersion")
     implementation("androidx.navigation:navigation-compose:$navVersion")
+
+    implementation("com.google.maps.android:maps-compose:2.8.0")
+    implementation("com.google.android.gms:play-services-maps:18.1.0")
+    implementation("com.android.volley:volley:1.2.1")
 
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.4")
