@@ -64,7 +64,6 @@ class MainActivity : AppCompatActivity() {
     private val viewModel: WorkStatusViewModel by viewModels()
 
     @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
-    @OptIn(ExperimentalMaterial3Api::class)
     @RequiresApi(Build.VERSION_CODES.S)
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen().run {
@@ -107,10 +106,10 @@ class MainActivity : AppCompatActivity() {
         }
 
         locationCallback = object : LocationCallback() {
-            override
-            fun onLocationResult(locationResult: LocationResult) {
+            override fun onLocationResult(locationResult: LocationResult) {
                 for (location in locationResult.locations) {
                     Log.v(TAG, "onLocationResult.$location")
+
                     viewModel.setCurrentLocation(
                         LatLng(
                             location.latitude,

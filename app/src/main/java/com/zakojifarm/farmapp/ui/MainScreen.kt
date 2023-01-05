@@ -374,12 +374,21 @@ private fun WorkLocationMap(viewModel: WorkStatusViewModel) {
     val isRequestedLocationUpdates = viewModel.isRequestedLocationUpdates.collectAsState()
     if (isRequestedLocationUpdates.value) {
         val currentLocation = viewModel.currentLatLng.collectAsState()
-        Log.v(TAG, "TesTes.8.$currentLocation")
 
         val cameraPositionState = rememberCameraPositionState {
             position = CameraPosition.fromLatLngZoom(
                 currentLocation.value, 16f
             )
+        }
+
+
+        LaunchedEffect(currentLocation) {
+            snapshotFlow { currentLocation.value }
+                .collect {
+                    cameraPositionState.position =
+                        CameraPosition.fromLatLngZoom(it, cameraPositionState.position.zoom)
+                    Log.v(TAG, "TesTes.10")
+                }
         }
 
         GoogleMap(
