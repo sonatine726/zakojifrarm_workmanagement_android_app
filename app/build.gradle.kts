@@ -49,6 +49,10 @@ android {
     kotlinOptions {
         jvmTarget = "1.8"
     }
+
+    packagingOptions {
+        resources.excludes.add("META-INF/*")
+    }
 }
 
 dependencies {
@@ -93,6 +97,10 @@ dependencies {
     implementation("com.google.maps.android:maps-compose:2.8.0")
     implementation("com.google.android.gms:play-services-maps:18.1.0")
     implementation("com.android.volley:volley:1.2.1")
+
+    implementation("com.google.api-client:google-api-client:2.0.0")
+    implementation("com.google.apis:google-api-services-drive:v3-rev20220815-2.0.0")
+    implementation("com.google.auth:google-auth-library-oauth2-http:1.16.1")
 
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.4")

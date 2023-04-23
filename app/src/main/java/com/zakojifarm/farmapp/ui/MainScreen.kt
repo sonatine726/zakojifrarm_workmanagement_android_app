@@ -24,6 +24,7 @@ import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.rememberCameraPositionState
 import com.zakojifarm.farmapp.R
 import com.zakojifarm.farmapp.data.*
+import com.zakojifarm.farmapp.utils.GoogleDriveUtils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -70,6 +71,9 @@ fun MainScreen(
                     snackbarHostState.showSnackbar(
                         "Snackbar Test"
                     )
+                    launch(Dispatchers.IO) {
+                        GoogleDriveUtils.uploadBarcodeFileToDrive()
+                    }
                 }
             })
         }
@@ -161,7 +165,6 @@ fun MainWindow(
                 onClick = {
                     Log.v(TAG, "Button.onClick.Data Upload")
                     onDataUploadButtonClicked()
-                    showDialog = true
                 },
             ) {
                 Text(stringResource(R.string.data_upload))
