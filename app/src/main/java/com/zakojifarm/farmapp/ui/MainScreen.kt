@@ -24,7 +24,7 @@ import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.rememberCameraPositionState
 import com.zakojifarm.farmapp.R
 import com.zakojifarm.farmapp.data.*
-import com.zakojifarm.farmapp.utils.GoogleDriveUtils
+import com.zakojifarm.farmapp.domain.EventList
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -65,14 +65,28 @@ fun MainScreen(
                     Log.v(TAG, "CustomDialog : $it")
                 }
 
-            MainWindow(viewModel, navController, onDataUploadButtonClicked = {
+            MainWindow(viewModel, navController, onDataUploadButtonClicked = { user ->
                 crScope.launch {
-                    Log.v(TAG, "TesTes.5")
                     snackbarHostState.showSnackbar(
-                        "Snackbar Test"
+                        "Start uploading Events"
                     )
                     launch(Dispatchers.IO) {
-                        GoogleDriveUtils.uploadBarcodeFileToDrive()
+                        val eventList = EventList(user)
+                        try {
+                            val gDriveFile = eventList.uploadEventListToGoogleDrive()
+                            Log.d(
+                                TAG,
+                                "Uploaded events to GDrive.${gDriveFile.id},${gDriveFile.name}"
+                            )
+                            snackbarHostState.showSnackbar(
+                                "Succeed in uploading events to GDrive"
+                            )
+                        } catch (e: Exception) {
+                            Log.e(TAG, "Failed to upload events to GDrive.$e")
+                            snackbarHostState.showSnackbar(
+                                "Error!. Failed to uploading events to GDrive"
+                            )
+                        }
                     }
                 }
             })
@@ -84,7 +98,7 @@ fun MainScreen(
 fun MainWindow(
     viewModel: WorkStatusViewModel,
     navController: NavHostController,
-    onDataUploadButtonClicked: () -> Unit
+    onDataUploadButtonClicked: (UserEntity) -> Unit
 ) {
     val isUserSignIn = viewModel.isUserSignIn.collectAsState()
     val user = viewModel.user.collectAsState()
@@ -163,8 +177,10 @@ fun MainWindow(
             WorkLocationMap(viewModel)
             Button(
                 onClick = {
-                    Log.v(TAG, "Button.onClick.Data Upload")
-                    onDataUploadButtonClicked()
+                    user.value?.let {
+                        Log.v(TAG, "Button.onClick.Data Upload.$it")
+                        onDataUploadButtonClicked(it)
+                    }
                 },
             ) {
                 Text(stringResource(R.string.data_upload))

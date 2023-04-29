@@ -11,8 +11,6 @@ import com.google.auth.http.HttpCredentialsAdapter
 import com.google.auth.oauth2.GoogleCredentials
 import com.zakojifarm.farmapp.MainApplication
 import java.io.File
-import java.io.FileWriter
-import java.io.IOException
 import java.util.*
 
 
@@ -20,8 +18,8 @@ class GoogleDriveUtils {
     companion object {
         private val TAG = GoogleDriveUtils::class.java.simpleName
 
-        fun uploadBarcodeFileToDrive() {
-            Log.v(TAG, "uploadBarcodeFileToDrive")
+        fun upload(file: File): com.google.api.services.drive.model.File {
+            Log.v(TAG, "uploadBarcodeFileToDrive(),${file.name}")
             val credentials =
                 GoogleCredentials.fromStream(MainApplication.instance.assets.open("zakojifarmapp-0d33671abfa7.json"))
                     .createScoped("https://www.googleapis.com/auth/drive")
@@ -30,7 +28,6 @@ class GoogleDriveUtils {
                 credentials
             )
 
-            // Build a new authorized API client service.
             val service = Drive.Builder(
                 NetHttpTransport(),
                 GsonFactory.getDefaultInstance(),
@@ -41,25 +38,16 @@ class GoogleDriveUtils {
 
             // Upload file photo.jpg on drive.
             val fileMetadata = com.google.api.services.drive.model.File().apply {
-                name = "test.txt"
+                name = file.name
                 parents = Collections.singletonList("1K6FDlRYgsGVMJFF8uJoa_ErIckxko2CX")
-            }
-
-            val file = File(MainApplication.instance.cacheDir, "test.txt")
-            try {
-                FileWriter(file).use { writer -> writer.write("testes") }
-            } catch (e: IOException) {
-                e.printStackTrace()
             }
 
             val mediaContent = FileContent("text/plain", file)
 
             try {
-                val resultFile =
-                    service.files().create(fileMetadata, mediaContent).setFields("id").execute()
-                Log.v(TAG, "File ID: " + resultFile.id)
+                return service.files().create(fileMetadata, mediaContent).setFields("id").execute()
             } catch (e: GoogleJsonResponseException) {
-                Log.v(TAG, "Unable to upload file: " + e.details)
+                Log.e(TAG, "Unable to upload file,${e.details}")
                 throw e
             }
         }
