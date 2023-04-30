@@ -76,7 +76,7 @@ class GoogleDriveUtils {
             Log.v(TAG, "delete(),${file.name}")
 
             try {
-                service.files().delete(file.id)
+                service.files().delete(file.id).execute()
             } catch (e: GoogleJsonResponseException) {
                 Log.e(TAG, "delete exception,${e.details}")
                 throw e
