@@ -17,7 +17,7 @@ interface EventRepository {
 
     suspend fun update(event: EventEntity)
 
-    suspend fun delete(event: EventEntity)
+    fun delete(event: EventEntity)
 
     suspend fun deleteAllOfUser(user: UserEntity)
 }

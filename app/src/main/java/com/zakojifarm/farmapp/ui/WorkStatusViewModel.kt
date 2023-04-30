@@ -17,7 +17,7 @@ import javax.inject.Inject
 @HiltViewModel
 class WorkStatusViewModel @Inject constructor(
     private val userRepository: UserRepository,
-    private val eventRepository: EventRepository
+    val eventRepository: EventRepository
 ) : ViewModel() {
     companion object {
         private val TAG = WorkStatusViewModel::class.java.simpleName

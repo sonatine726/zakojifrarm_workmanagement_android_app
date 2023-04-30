@@ -25,12 +25,10 @@ import com.google.maps.android.compose.rememberCameraPositionState
 import com.zakojifarm.farmapp.R
 import com.zakojifarm.farmapp.data.*
 import com.zakojifarm.farmapp.domain.EventList
+import com.zakojifarm.farmapp.utils.DateUtils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.time.Instant
-import java.time.ZoneOffset
-import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import java.util.*
 import kotlin.concurrent.scheduleAtFixedRate
@@ -68,15 +66,15 @@ fun MainScreen(
             MainWindow(viewModel, navController, onDataUploadButtonClicked = { user ->
                 crScope.launch {
                     snackbarHostState.showSnackbar(
-                        "Start uploading Events"
+                        "Start uploading events to GDrive"
                     )
                     launch(Dispatchers.IO) {
-                        val eventList = EventList(user)
+                        val eventList = EventList(user, viewModel.eventRepository)
                         try {
-                            val gDriveFile = eventList.uploadEventListToGoogleDrive()
+                            eventList.uploadEventListsToGoogleDrive()
                             Log.d(
                                 TAG,
-                                "Uploaded events to GDrive.${gDriveFile.id},${gDriveFile.name}"
+                                "Uploaded events to GDrive"
                             )
                             snackbarHostState.showSnackbar(
                                 "Succeed in uploading events to GDrive"
@@ -312,13 +310,8 @@ fun WorkingStatus(workStatus: WorkStatus, workKind: WorkKind?) {
 }
 
 private fun currentTimeStr(timeMs: Long): String {
-    val zonedDt = ZonedDateTime.ofInstant(
-        Instant.ofEpochMilli(timeMs),
-        ZoneOffset.systemDefault()
-    )
-
-    val df = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss")
-    return df.format(zonedDt)
+    return DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss")
+        .format(DateUtils.epochMilliToSystemZonedDateTime(timeMs))
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

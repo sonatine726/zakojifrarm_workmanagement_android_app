@@ -102,6 +102,8 @@ dependencies {
     implementation("com.google.apis:google-api-services-drive:v3-rev20220815-2.0.0")
     implementation("com.google.auth:google-auth-library-oauth2-http:1.16.1")
 
+    implementation("com.github.doyaaaaaken:kotlin-csv-jvm:1.9.0")
+
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.4")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.0")

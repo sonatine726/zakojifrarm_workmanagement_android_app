@@ -55,7 +55,7 @@ class EventRepositoryImpl @Inject constructor(private val userDao: UserDao) : Ev
 
     override suspend fun update(event: EventEntity) = userDao.updateEvent(event)
 
-    override suspend fun delete(event: EventEntity) = userDao.deleteEvent(event)
+    override fun delete(event: EventEntity) = userDao.deleteEvent(event)
 
     override suspend fun deleteAllOfUser(user: UserEntity) = userDao.deleteAllEvent(user.id)
 }
