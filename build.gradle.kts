@@ -13,6 +13,7 @@ tasks.register("clean", Delete::class) {
 buildscript {
     repositories {
         google()
+        mavenCentral()
     }
     dependencies {
         val navVersion = "2.5.3"

@@ -48,14 +48,14 @@ class EventRepositoryImpl @Inject constructor(private val userDao: UserDao) : Ev
         return StartAndEndUnixEpochOfDay(start, end)
     }
 
-    override suspend fun add(user: UserEntity, event: EventEntity) {
+    override fun add(user: UserEntity, event: EventEntity) {
         event.userId = user.id
         userDao.insertEvent(event)
     }
 
-    override suspend fun update(event: EventEntity) = userDao.updateEvent(event)
+    override fun update(event: EventEntity) = userDao.updateEvent(event)
 
-    override suspend fun delete(event: EventEntity) = userDao.deleteEvent(event)
+    override fun delete(event: EventEntity) = userDao.deleteEvent(event)
 
-    override suspend fun deleteAllOfUser(user: UserEntity) = userDao.deleteAllEvent(user.id)
+    override fun deleteAllOfUser(user: UserEntity) = userDao.deleteAllEvent(user.id)
 }

@@ -24,12 +24,11 @@ import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.rememberCameraPositionState
 import com.zakojifarm.farmapp.R
 import com.zakojifarm.farmapp.data.*
+import com.zakojifarm.farmapp.domain.EventList
+import com.zakojifarm.farmapp.utils.DateUtils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.time.Instant
-import java.time.ZoneOffset
-import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import java.util.*
 import kotlin.concurrent.scheduleAtFixedRate
@@ -64,12 +63,29 @@ fun MainScreen(
                     Log.v(TAG, "CustomDialog : $it")
                 }
 
-            MainWindow(viewModel, navController, onDataUploadButtonClicked = {
+            MainWindow(viewModel, navController, onDataUploadButtonClicked = { user ->
                 crScope.launch {
-                    Log.v(TAG, "TesTes.5")
                     snackbarHostState.showSnackbar(
-                        "Snackbar Test"
+                        "Start uploading events to GDrive"
                     )
+                    launch(Dispatchers.IO) {
+                        val eventList = EventList(user, viewModel.eventRepository)
+                        try {
+                            eventList.uploadEventListsToGoogleDrive()
+                            Log.d(
+                                TAG,
+                                "Uploaded events to GDrive"
+                            )
+                            snackbarHostState.showSnackbar(
+                                "Succeed in uploading events to GDrive"
+                            )
+                        } catch (e: Exception) {
+                            Log.e(TAG, "Failed to upload events to GDrive.$e")
+                            snackbarHostState.showSnackbar(
+                                "Error!. Failed to uploading events to GDrive"
+                            )
+                        }
+                    }
                 }
             })
         }
@@ -80,7 +96,7 @@ fun MainScreen(
 fun MainWindow(
     viewModel: WorkStatusViewModel,
     navController: NavHostController,
-    onDataUploadButtonClicked: () -> Unit
+    onDataUploadButtonClicked: (UserEntity) -> Unit
 ) {
     val isUserSignIn = viewModel.isUserSignIn.collectAsState()
     val user = viewModel.user.collectAsState()
@@ -159,9 +175,10 @@ fun MainWindow(
             WorkLocationMap(viewModel)
             Button(
                 onClick = {
-                    Log.v(TAG, "Button.onClick.Data Upload")
-                    onDataUploadButtonClicked()
-                    showDialog = true
+                    user.value?.let {
+                        Log.v(TAG, "Button.onClick.Data Upload.$it")
+                        onDataUploadButtonClicked(it)
+                    }
                 },
             ) {
                 Text(stringResource(R.string.data_upload))
@@ -293,13 +310,8 @@ fun WorkingStatus(workStatus: WorkStatus, workKind: WorkKind?) {
 }
 
 private fun currentTimeStr(timeMs: Long): String {
-    val zonedDt = ZonedDateTime.ofInstant(
-        Instant.ofEpochMilli(timeMs),
-        ZoneOffset.systemDefault()
-    )
-
-    val df = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss")
-    return df.format(zonedDt)
+    return DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss")
+        .format(DateUtils.epochMilliToSystemZonedDateTime(timeMs))
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
