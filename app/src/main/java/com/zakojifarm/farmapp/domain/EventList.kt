@@ -49,13 +49,21 @@ class EventList(private val user: UserEntity, private val eventRepository: Event
                 Log.v(TAG, "CSV file already exists in GDrive.$date,$fileName")
             } else {
                 val tempFile = makeEventsFileInCacheDir(fileName, events, user)
-                if (isFileExist) {
-                    val existFiles = gDriveFileList.filter { it.name == fileName }
+                GoogleDriveUtils.upload(tempFile)
+
+                //Delete old files in Google Drive
+                val deleteFileName = when {
+                    isFileExist -> fileName
+                    isFinalVersion -> makeEventsFileName(date, false)
+                    else -> null
+                }
+
+                if (deleteFileName != null) {
+                    val existFiles = gDriveFileList.filter { it.name == deleteFileName }
                     existFiles.forEach {
                         GoogleDriveUtils.delete(it)
                     }
                 }
-                GoogleDriveUtils.upload(tempFile)
             }
         }
 
